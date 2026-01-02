@@ -1,4 +1,4 @@
-import { Event } from '@/data/mockEvents';
+import { Event } from '../data/mockEvents';
 
 export type SortOption = 'soonest' | 'trending' | 'newest';
 
@@ -117,7 +117,6 @@ export function getRelatedEvents(currentEvent: Event, allEvents: Event[], limit:
   
   return related;
 }
-
 
 
 

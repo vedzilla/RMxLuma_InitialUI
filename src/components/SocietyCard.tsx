@@ -23,3 +23,7 @@ export default function SocietyCard({ name, category, eventCount, initials }: So
   );
 }
 
+
+
+
+

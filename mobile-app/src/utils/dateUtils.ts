@@ -1,5 +1,3 @@
-import { Event } from '@/data/mockEvents';
-
 /**
  * Format a date-time string to a readable format
  * Example: "2024-12-18T19:00:00Z" -> "Wed, 18 Dec, 7:00 PM"
@@ -95,7 +93,6 @@ export function isToday(dateTimeString: string): boolean {
 export function isPast(dateTimeString: string): boolean {
   return new Date(dateTimeString) < new Date();
 }
-
 
 
 
