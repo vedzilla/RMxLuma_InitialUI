@@ -21,28 +21,28 @@ const societyNames = [
   'Film Society',
 ];
 
-// Static logos positioned around the robot - evenly spaced in orbital pattern
+// Static logos positioned around the robot - with mobile and desktop positions
 const orbitingLogos = [
   // Top row
-  { id: 1, src: '/logos/filmmaking.png', name: 'Film Making', position: 'top-0 left-8', delay: 0 },
-  { id: 7, src: '/logos/ba-econ.png', name: 'BA Econ', position: 'top-4 left-1/2 -translate-x-1/2', delay: 0.1 },
-  { id: 2, src: '/logos/hindu-society.png', name: 'Hindu Society', position: 'top-0 right-8', delay: 0.2 },
+  { id: 1, src: '/logos/filmmaking.png', name: 'Film Making', position: 'top-0 left-8', mobilePosition: 'top-0 left-4', delay: 0 },
+  { id: 7, src: '/logos/ba-econ.png', name: 'BA Econ', position: 'top-4 left-1/2 -translate-x-1/2', mobilePosition: 'top-0 left-1/2 -translate-x-1/2', delay: 0.1 },
+  { id: 2, src: '/logos/hindu-society.png', name: 'Hindu Society', position: 'top-0 right-8', mobilePosition: 'top-0 right-4', delay: 0.2 },
   
   // Upper middle
-  { id: 5, src: '/logos/awm.png', name: 'Asset Management', position: 'top-24 -left-6', delay: 0.3 },
-  { id: 9, src: '/logos/psychology.png', name: 'Psychology', position: 'top-24 -right-6', delay: 0.4 },
+  { id: 5, src: '/logos/awm.png', name: 'Asset Management', position: 'top-24 -left-6', mobilePosition: 'top-12 left-0', delay: 0.3 },
+  { id: 9, src: '/logos/psychology.png', name: 'Psychology', position: 'top-24 -right-6', mobilePosition: 'top-12 right-0', delay: 0.4 },
   
   // Middle row
-  { id: 11, src: '/logos/board-games.png', name: 'Board Games', position: 'top-1/2 -translate-y-1/2 -left-10', delay: 0.5 },
-  { id: 6, src: '/logos/isoc.png', name: 'ISOC', position: 'top-1/2 -translate-y-1/2 -right-10', delay: 0.6 },
+  { id: 11, src: '/logos/board-games.png', name: 'Board Games', position: 'top-1/2 -translate-y-1/2 -left-10', mobilePosition: 'top-1/2 -translate-y-1/2 -left-2', delay: 0.5 },
+  { id: 6, src: '/logos/isoc.png', name: 'ISOC', position: 'top-1/2 -translate-y-1/2 -right-10', mobilePosition: 'top-1/2 -translate-y-1/2 -right-2', delay: 0.6 },
   
   // Lower middle
-  { id: 8, src: '/logos/drama.png', name: 'Drama', position: 'bottom-32 -left-4', delay: 0.7 },
-  { id: 10, src: '/logos/acs.png', name: 'ACS', position: 'bottom-32 -right-4', delay: 0.8 },
+  { id: 8, src: '/logos/drama.png', name: 'Drama', position: 'bottom-32 -left-4', mobilePosition: 'bottom-20 left-0', delay: 0.7 },
+  { id: 10, src: '/logos/acs.png', name: 'ACS', position: 'bottom-32 -right-4', mobilePosition: 'bottom-20 right-0', delay: 0.8 },
   
   // Bottom row
-  { id: 3, src: '/logos/love-society.png', name: 'Love Society', position: 'bottom-8 left-12', delay: 0.9 },
-  { id: 4, src: '/logos/baking.png', name: 'Baking Society', position: 'bottom-8 right-12', delay: 1.0 },
+  { id: 3, src: '/logos/love-society.png', name: 'Love Society', position: 'bottom-8 left-12', mobilePosition: 'bottom-4 left-6', delay: 0.9 },
+  { id: 4, src: '/logos/baking.png', name: 'Baking Society', position: 'bottom-8 right-12', mobilePosition: 'bottom-4 right-6', delay: 1.0 },
 ];
 
 export default function LandingPage() {
@@ -237,10 +237,10 @@ export default function LandingPage() {
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-purple-500/10 rounded-full blur-3xl" />
               
               {/* Static Orbiting Logos - positioned around the robot */}
-              {!isMobile && orbitingLogos.map((logo) => (
+              {orbitingLogos.map((logo) => (
                 <motion.div
                   key={logo.id}
-                  className={`absolute ${logo.position} z-20 pointer-events-none`}
+                  className={`absolute ${isMobile ? logo.mobilePosition : logo.position} z-20 pointer-events-none`}
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: logo.delay + 0.8, duration: 0.5, type: 'spring' }}
@@ -248,7 +248,7 @@ export default function LandingPage() {
                   {/* Floating animation */}
                   <motion.div
                     animate={{
-                      y: [0, -8, 0],
+                      y: [0, isMobile ? -4 : -8, 0],
                       rotate: [0, 2, -2, 0],
                     }}
                     transition={{
@@ -257,8 +257,8 @@ export default function LandingPage() {
                       ease: 'easeInOut',
                     }}
                   >
-                    {/* Circular frame with glow */}
-                    <div className="relative w-14 h-14 rounded-full overflow-hidden border-2 border-white/30 shadow-xl shadow-black/20 bg-white">
+                    {/* Circular frame with glow - smaller on mobile */}
+                    <div className={`relative rounded-full overflow-hidden border-2 border-white/30 shadow-xl shadow-black/20 bg-white ${isMobile ? 'w-10 h-10' : 'w-14 h-14'}`}>
                       {/* Subtle glow ring */}
                       <div className="absolute -inset-1 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-full blur-sm -z-10" />
                       {/* Logo image */}
