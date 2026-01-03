@@ -101,9 +101,9 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center pt-20">
+      <section className="relative min-h-screen flex items-center pt-24 pb-8 lg:pt-20 lg:pb-0">
         <div className="max-w-[1200px] mx-auto px-6 w-full">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-4 items-center min-h-[80vh]">
+          <div className="grid lg:grid-cols-2 gap-4 lg:gap-4 items-center min-h-[80vh] lg:min-h-[80vh]">
             {/* Left: Text Content */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -231,7 +231,7 @@ export default function LandingPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.4, duration: 0.8 }}
-              className="relative h-[500px] lg:h-[600px] hidden lg:block"
+              className="relative h-[350px] sm:h-[400px] lg:h-[600px]"
             >
               {/* Glow behind robot */}
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-purple-500/10 rounded-full blur-3xl" />
