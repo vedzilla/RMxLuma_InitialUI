@@ -109,7 +109,7 @@ export default function LandingPage() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: 'easeOut' }}
-              className="relative z-10 max-w-2xl"
+              className="relative z-10 max-w-2xl text-center lg:text-left mx-auto lg:mx-0"
             >
               {/* Logo */}
               <motion.img
@@ -118,7 +118,7 @@ export default function LandingPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="h-36 md:h-44 w-auto mt-4 mb-2 -ml-6 object-contain object-left"
+                className="h-36 md:h-44 w-auto mt-4 mb-2 mx-auto lg:mx-0 lg:-ml-6 object-contain"
               />
 
               {/* Badge */}
@@ -149,7 +149,7 @@ export default function LandingPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4, duration: 0.6 }}
-                className="text-muted text-[17px] leading-[1.6] mb-5 max-w-md"
+                className="text-muted text-[17px] leading-[1.6] mb-5 max-w-md mx-auto lg:mx-0"
               >
                 Never miss a society event again. 800+ events from Manchester universities, one platform.
               </motion.p>
@@ -170,7 +170,7 @@ export default function LandingPage() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.3 }}
-                      className="absolute left-0 font-semibold text-red"
+                      className="absolute left-1/2 -translate-x-1/2 lg:left-0 lg:translate-x-0 font-semibold text-red whitespace-nowrap"
                     >
                       {societyNames[currentIndex]}
                     </motion.span>
@@ -183,7 +183,7 @@ export default function LandingPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6, duration: 0.6 }}
-                className="flex flex-wrap gap-3"
+                className="flex flex-wrap gap-3 justify-center lg:justify-start"
               >
                 <Link
                   href="/discover"
@@ -207,7 +207,7 @@ export default function LandingPage() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.8 }}
-                className="mt-10 flex items-center gap-6 text-sm"
+                className="mt-10 flex items-center justify-center lg:justify-start gap-6 text-sm"
               >
                 <div>
                   <p className="text-xl font-bold text-text">800+</p>
