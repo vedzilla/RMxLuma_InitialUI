@@ -10,7 +10,7 @@ interface PageProps {
 
 export default function UniversityPage({ params }: PageProps) {
   const universityName = getAllUniversities().find(
-    uni => uni.toLowerCase().replace(/\s+/g, '-') === params.uniSlug
+    uni => uni.toLowerCase().replace(/\s+/g, '-') === params.uniSlug.toLowerCase()
   );
 
   if (!universityName) {

@@ -9,8 +9,9 @@ interface PageProps {
 }
 
 export default function CityPage({ params }: PageProps) {
+  const normalizedSlug = params.citySlug.toLowerCase();
   const cityName = getAllCities().find(
-    city => city.toLowerCase().replace(/\s+/g, '-') === params.citySlug
+    city => city.toLowerCase().replace(/\s+/g, '-') === normalizedSlug
   );
 
   if (!cityName) {
