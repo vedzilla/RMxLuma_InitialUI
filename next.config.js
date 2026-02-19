@@ -10,6 +10,14 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'via.placeholder.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'dgzzf6k1ibya0.cloudfront.net',
+      },
+      {
+        protocol: 'https',
+        hostname: 'scontent-man2-1.cdninstagram.com',
+      },
     ],
   },
 }

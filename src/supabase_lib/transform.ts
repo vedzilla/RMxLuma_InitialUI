@@ -1,0 +1,111 @@
+import type {
+  EventWithRelations,
+  SocietyWithUniversity,
+  UniversityWithCity,
+  CityRow,
+  CategoryRow,
+  Event,
+  Society,
+  University,
+  Category,
+  City,
+} from './types';
+
+// ---- Helpers ----
+
+export function generateSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+function formatPriceLabel(isFree: boolean, price: string | null): string {
+  if (isFree) return 'Free';
+  if (price) return price;
+  return 'See event page';
+}
+
+function capitalizeCategory(name: string): string {
+  const mapping: Record<string, string> = {
+    workshop: 'Workshop',
+    social: 'Social',
+    academic: 'Academic',
+    career: 'Career',
+    sports: 'Sports',
+    arts: 'Arts',
+    trip: 'Trip',
+  };
+  return mapping[name.toLowerCase()] ?? name.charAt(0).toUpperCase() + name.slice(1);
+}
+
+// ---- Transformers ----
+
+export function transformEvent(row: EventWithRelations): Event {
+  const firstSocietyEntry = row.event_societies?.[0];
+  const society = firstSocietyEntry?.societies ?? null;
+  const university = society?.universities ?? null;
+  const category = row.categories;
+
+  // Pick the primary image: sort event_images by image_index, take the first s3_url.
+  const sortedImages = [...(row.event_images ?? [])].sort(
+    (a, b) => (a.image_index ?? 0) - (b.image_index ?? 0)
+  );
+  const imageUrl = sortedImages[0]?.post_images?.s3_url ?? '';
+
+  return {
+    id: row.id,
+    slug: generateSlug(row.title),
+    title: row.title,
+    description: row.description,
+    startDateTime: row.event_date,
+    endDateTime: row.event_end ?? undefined,
+    city: university?.cities?.name ?? 'Unknown',
+    university: university?.name ?? 'University of Manchester',
+    societyName: society?.name ?? 'Unknown Society',
+    locationName: row.location,
+    imageUrl,
+    externalUrl: row.registration_url ?? row.source_post_url ?? '',
+    tags: category ? [capitalizeCategory(category.name)] : ['General'],
+    interestedCount: row.likes,
+    savedCount: Math.floor(row.likes * 0.3),
+    createdAt: row.created_at,
+    priceLabel: formatPriceLabel(row.is_free, row.price),
+  };
+}
+
+export function transformSociety(row: SocietyWithUniversity): Society {
+  return {
+    id: row.id,
+    name: row.name,
+    instagram: row.instagram_handle,
+    description: row.description ?? '',
+    university: row.universities?.name ?? 'Unknown University',
+    imageUrl: row.image_url ?? '',
+    bioUrl: row.bio_url ?? '',
+  };
+}
+
+export function transformUniversity(row: UniversityWithCity): University {
+  return {
+    id: row.id,
+    name: row.name,
+    shortName: row.short_name,
+    cityName: row.cities?.name ?? null,
+  };
+}
+
+export function transformCity(row: CityRow): City {
+  return {
+    id: row.id,
+    name: row.name,
+    slug: generateSlug(row.name),
+  };
+}
+
+export function transformCategory(row: CategoryRow): Category {
+  return {
+    id: row.id,
+    name: row.name,
+  };
+}

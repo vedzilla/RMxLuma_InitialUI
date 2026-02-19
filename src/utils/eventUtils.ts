@@ -1,4 +1,4 @@
-import { Event } from '@/data/mockEvents';
+import { Event } from '@/data/events';
 
 export type SortOption = 'soonest' | 'trending' | 'newest';
 

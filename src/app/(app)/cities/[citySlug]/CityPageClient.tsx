@@ -1,33 +1,33 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { mockEvents } from '@/data/mockEvents';
+import Link from 'next/link';
+import { Event } from '@/data/events';
 import { filterEvents, sortEvents, SortOption } from '@/utils/eventUtils';
 import SearchBar from '@/components/SearchBar';
 import FilterPills from '@/components/FilterPills';
 import SortDropdown from '@/components/SortDropdown';
 import EventGrid from '@/components/EventGrid';
-import Link from 'next/link';
 
 interface CityPageClientProps {
   cityName: string;
+  events: Event[];
+  tags: string[];
 }
 
-export default function CityPageClient({ cityName }: CityPageClientProps) {
+export default function CityPageClient({ cityName, events, tags }: CityPageClientProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState<string | undefined>();
   const [sortBy, setSortBy] = useState<SortOption>('soonest');
 
-  // Filter events by city
   const cityEvents = useMemo(() => {
-    let events = filterEvents(mockEvents, searchQuery, selectedTag, cityName);
-    events = sortEvents(events, sortBy);
-    return events;
-  }, [searchQuery, selectedTag, sortBy, cityName]);
+    let filtered = filterEvents(events, searchQuery, selectedTag);
+    filtered = sortEvents(filtered, sortBy);
+    return filtered;
+  }, [events, searchQuery, selectedTag, sortBy]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header */}
       <div className="mb-8">
         <h1 className="text-4xl md:text-5xl font-bold text-text mb-4">
           Events in {cityName}
@@ -43,16 +43,14 @@ export default function CityPageClient({ cityName }: CityPageClientProps) {
         </Link>
       </div>
 
-      {/* Search and Filters */}
       <div className="mb-8 space-y-4">
         <div className="flex flex-col sm:flex-row gap-4">
           <SearchBar value={searchQuery} onChange={setSearchQuery} />
           <SortDropdown value={sortBy} onChange={setSortBy} />
         </div>
-        <FilterPills selectedTag={selectedTag} onTagSelect={setSelectedTag} />
+        <FilterPills tags={tags} selectedTag={selectedTag} onTagSelect={setSelectedTag} />
       </div>
 
-      {/* Events */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-text">Events</h2>
@@ -63,8 +61,3 @@ export default function CityPageClient({ cityName }: CityPageClientProps) {
     </div>
   );
 }
-
-
-
-
-

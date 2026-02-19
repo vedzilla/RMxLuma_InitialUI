@@ -1,4 +1,4 @@
-import { Event } from '@/data/mockEvents';
+import { Event } from '@/data/events';
 
 /**
  * Format a date-time string to a readable format

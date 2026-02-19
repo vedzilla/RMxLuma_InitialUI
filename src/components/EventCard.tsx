@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { Event } from '@/data/mockEvents';
+import { Event } from '@/data/events';
 import { formatDateTime } from '@/utils/dateUtils';
 
 interface EventCardProps {

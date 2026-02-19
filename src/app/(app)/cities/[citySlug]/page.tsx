@@ -1,23 +1,28 @@
-import { mockEvents, getAllCities } from '@/data/mockEvents';
-import CityPageClient from './CityPageClient';
 import { notFound } from 'next/navigation';
+import { getEvents, getCities, getEventTags } from '@/supabase_lib';
+import CityPageClient from './CityPageClient';
+
+export const revalidate = 300;
 
 interface PageProps {
-  params: {
-    citySlug: string;
-  };
+  params: Promise<{ citySlug: string }>;
 }
 
-export default function CityPage({ params }: PageProps) {
-  const normalizedSlug = params.citySlug.toLowerCase();
-  const cityName = getAllCities().find(
-    city => city.toLowerCase().replace(/\s+/g, '-') === normalizedSlug
-  );
+export default async function CityPage({ params }: PageProps) {
+  const { citySlug } = await params;
+  const [cities, tags, events] = await Promise.all([
+    getCities(),
+    getEventTags(),
+    getEvents(),
+  ]);
 
-  if (!cityName) {
+  const city = cities.find(c => c.slug === citySlug.toLowerCase());
+
+  if (!city) {
     notFound();
   }
 
-  return <CityPageClient cityName={cityName} />;
-}
+  const cityEvents = events.filter(e => e.city.toLowerCase() === city.name.toLowerCase());
 
+  return <CityPageClient cityName={city.name} events={cityEvents} tags={tags} />;
+}

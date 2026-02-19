@@ -1,17 +1,17 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Event } from '@/data/mockEvents';
+import { Event } from '@/data/events';
 import { formatDate, formatTime } from '@/utils/dateUtils';
 import EventCard from './EventCard';
 import { getRelatedEvents } from '@/utils/eventUtils';
-import { mockEvents } from '@/data/mockEvents';
 
 interface EventDetailProps {
   event: Event;
+  allEvents: Event[];
 }
 
-export default function EventDetail({ event }: EventDetailProps) {
-  const relatedEvents = getRelatedEvents(event, mockEvents);
+export default function EventDetail({ event, allEvents }: EventDetailProps) {
+  const relatedEvents = getRelatedEvents(event, allEvents);
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -116,8 +116,3 @@ export default function EventDetail({ event }: EventDetailProps) {
     </div>
   );
 }
-
-
-
-
-

@@ -1,9 +1,8 @@
 import Link from 'next/link';
-import { getAllTags } from '@/data/mockEvents';
-import { mockEvents } from '@/data/mockEvents';
 
 interface CategoryCardProps {
   categoryName: string;
+  count: number;
   onClick?: () => void;
 }
 
@@ -74,11 +73,9 @@ const categoryColors: Record<string, string> = {
   'Food & Drink': '#F97316',
 };
 
-export default function CategoryCard({ categoryName, onClick }: CategoryCardProps) {
-  const count = mockEvents.filter(e => e.tags.includes(categoryName)).length;
+export default function CategoryCard({ categoryName, count, onClick }: CategoryCardProps) {
   const icon = categoryIcons[categoryName] || categoryIcons['Social'];
   const color = categoryColors[categoryName] || '#64748B';
-
   const categorySlug = categoryName.toLowerCase().replace(/\s+/g, '-');
 
   return (
@@ -99,4 +96,3 @@ export default function CategoryCard({ categoryName, onClick }: CategoryCardProp
     </Link>
   );
 }
-

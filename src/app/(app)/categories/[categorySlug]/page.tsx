@@ -1,14 +1,13 @@
-import { mockEvents, getAllTags } from '@/data/mockEvents';
-import CategoryPageClient from './CategoryPageClient';
 import { notFound } from 'next/navigation';
+import { getEvents, getEventTags } from '@/supabase_lib';
+import CategoryPageClient from './CategoryPageClient';
+
+export const revalidate = 300;
 
 interface PageProps {
-  params: {
-    categorySlug: string;
-  };
+  params: Promise<{ categorySlug: string }>;
 }
 
-// Category descriptions and keywords
 const categoryData: Record<string, { description: string; keywords: string[]; imageKeyword: string }> = {
   'Sports': {
     description: 'From competitive matches to casual sessions, join sports events to stay active, build teamwork, and connect with fellow athletes.',
@@ -52,9 +51,15 @@ const categoryData: Record<string, { description: string; keywords: string[]; im
   },
 };
 
-export default function CategoryPage({ params }: PageProps) {
-  const categoryName = getAllTags().find(
-    tag => tag.toLowerCase().replace(/\s+/g, '-') === params.categorySlug
+export default async function CategoryPage({ params }: PageProps) {
+  const { categorySlug } = await params;
+  const [allTags, events] = await Promise.all([
+    getEventTags(),
+    getEvents(),
+  ]);
+
+  const categoryName = allTags.find(
+    tag => tag.toLowerCase().replace(/\s+/g, '-') === categorySlug
   );
 
   if (!categoryName || !categoryData[categoryName]) {
@@ -62,9 +67,8 @@ export default function CategoryPage({ params }: PageProps) {
   }
 
   const categoryInfo = categoryData[categoryName];
-  const categoryEvents = mockEvents.filter(e => e.tags.includes(categoryName));
-  const eventCount = categoryEvents.length;
-  const subscriberCount = Math.floor(eventCount * 45); // Estimate subscribers
+  const categoryEvents = events.filter(e => e.tags.includes(categoryName));
+  const subscriberCount = Math.floor(categoryEvents.length * 45);
 
   return (
     <CategoryPageClient
@@ -72,13 +76,9 @@ export default function CategoryPage({ params }: PageProps) {
       description={categoryInfo.description}
       keywords={categoryInfo.keywords}
       imageKeyword={categoryInfo.imageKeyword}
-      eventCount={eventCount}
+      eventCount={categoryEvents.length}
       subscriberCount={subscriberCount}
+      events={categoryEvents}
     />
   );
 }
-
-
-
-
-

@@ -2,14 +2,15 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { getAllCities, getAllUniversities } from '@/data/mockEvents';
 
-export default function Header() {
+interface HeaderProps {
+  cities: string[];
+  universities: string[];
+}
+
+export default function Header({ cities, universities }: HeaderProps) {
   const [showCitiesDropdown, setShowCitiesDropdown] = useState(false);
   const [showUniversitiesDropdown, setShowUniversitiesDropdown] = useState(false);
-  
-  const cities = getAllCities();
-  const universities = getAllUniversities();
 
   return (
     <div className="sticky top-0 z-10 bg-[rgba(250,250,250,0.85)] backdrop-blur-[10px] border-b border-border">
@@ -88,4 +89,3 @@ export default function Header() {
     </div>
   );
 }
-

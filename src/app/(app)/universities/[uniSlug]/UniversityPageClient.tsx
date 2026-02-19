@@ -1,29 +1,30 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { mockEvents } from '@/data/mockEvents';
+import Link from 'next/link';
+import { Event } from '@/data/events';
 import { filterEvents, sortEvents, SortOption } from '@/utils/eventUtils';
 import SearchBar from '@/components/SearchBar';
 import FilterPills from '@/components/FilterPills';
 import SortDropdown from '@/components/SortDropdown';
 import EventGrid from '@/components/EventGrid';
-import Link from 'next/link';
 
 interface UniversityPageClientProps {
   universityName: string;
+  events: Event[];
+  tags: string[];
 }
 
-export default function UniversityPageClient({ universityName }: UniversityPageClientProps) {
+export default function UniversityPageClient({ universityName, events, tags }: UniversityPageClientProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState<string | undefined>();
   const [sortBy, setSortBy] = useState<SortOption>('soonest');
 
-  // Filter events by university
   const universityEvents = useMemo(() => {
-    let events = filterEvents(mockEvents, searchQuery, selectedTag, undefined, universityName);
-    events = sortEvents(events, sortBy);
-    return events;
-  }, [searchQuery, selectedTag, sortBy, universityName]);
+    let filtered = filterEvents(events, searchQuery, selectedTag);
+    filtered = sortEvents(filtered, sortBy);
+    return filtered;
+  }, [events, searchQuery, selectedTag, sortBy]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -49,7 +50,7 @@ export default function UniversityPageClient({ universityName }: UniversityPageC
           <SearchBar value={searchQuery} onChange={setSearchQuery} />
           <SortDropdown value={sortBy} onChange={setSortBy} />
         </div>
-        <FilterPills selectedTag={selectedTag} onTagSelect={setSelectedTag} />
+        <FilterPills tags={tags} selectedTag={selectedTag} onTagSelect={setSelectedTag} />
       </div>
 
       {/* Events */}
@@ -63,8 +64,3 @@ export default function UniversityPageClient({ universityName }: UniversityPageC
     </div>
   );
 }
-
-
-
-
-

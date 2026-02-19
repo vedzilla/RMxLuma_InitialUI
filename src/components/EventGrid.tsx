@@ -1,6 +1,6 @@
 'use client';
 
-import { Event } from '@/data/mockEvents';
+import { Event } from '@/data/events';
 import EventCard from './EventCard';
 
 interface EventGridProps {

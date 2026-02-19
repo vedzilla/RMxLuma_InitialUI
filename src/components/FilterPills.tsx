@@ -1,15 +1,12 @@
 'use client';
 
-import { getAllTags } from '@/data/mockEvents';
-
 interface FilterPillsProps {
+  tags: string[];
   selectedTag?: string;
   onTagSelect: (tag: string | undefined) => void;
 }
 
-export default function FilterPills({ selectedTag, onTagSelect }: FilterPillsProps) {
-  const tags = getAllTags();
-
+export default function FilterPills({ tags, selectedTag, onTagSelect }: FilterPillsProps) {
   return (
     <div className="flex flex-wrap gap-2">
       <button
@@ -38,4 +35,3 @@ export default function FilterPills({ selectedTag, onTagSelect }: FilterPillsPro
     </div>
   );
 }
-

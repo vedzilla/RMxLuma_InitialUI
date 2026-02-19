@@ -1,15 +1,21 @@
 import { notFound } from 'next/navigation';
-import { mockEvents } from '@/data/mockEvents';
+import { getEventBySlug, getEvents } from '@/supabase_lib';
 import EventDetail from '@/components/EventDetail';
 
+export const revalidate = 300;
+
 interface PageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
-export default function EventPage({ params }: PageProps) {
-  const event = mockEvents.find(e => e.slug === params.slug);
+export default async function EventPage({ params }: PageProps) {
+  const { slug } = await params;
+  const [event, allEvents] = await Promise.all([
+    getEventBySlug(slug),
+    getEvents({ upcomingOnly: false }),
+  ]);
 
   if (!event) {
     notFound();
@@ -17,18 +23,7 @@ export default function EventPage({ params }: PageProps) {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <EventDetail event={event} />
+      <EventDetail event={event} allEvents={allEvents} />
     </div>
   );
 }
-
-export function generateStaticParams() {
-  return mockEvents.map(event => ({
-    slug: event.slug,
-  }));
-}
-
-
-
-
-
