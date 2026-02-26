@@ -13,7 +13,8 @@ const EVENT_SELECT = `
       universities(id, name, short_name, city_id, created_at, cities(id, name))
     )
   ),
-  event_images(post_id, image_index, post_images(s3_url))
+  event_images(post_id, image_index, post_images(s3_url)),
+  schedule_entries(id, scheduled_at, is_end_schedule, schedule_order, location_id, locations(id, name, google_maps_url))
 `.trim();
 
 export interface GetEventsOptions {
@@ -36,29 +37,28 @@ export interface GetEventsOptions {
 export async function getEvents(options: GetEventsOptions = {}): Promise<Event[]> {
   const { upcomingOnly = true, limit } = options;
 
-  let query = getClient()
+  const { data, error } = await getClient()
     .from('events')
-    .select(EVENT_SELECT)
-    .order('event_date', { ascending: true });
-
-  if (upcomingOnly) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    query = query.gte('event_date', today.toISOString());
-  }
-
-  if (limit) {
-    query = query.limit(limit);
-  }
-
-  const { data, error } = await query;
+    .select(EVENT_SELECT);
 
   if (error) {
     console.error('[supabase_lib] getEvents error:', error.message);
     return [];
   }
 
-  const events = (data as unknown as EventWithRelations[]).map(transformEvent);
+  let events = (data as unknown as EventWithRelations[]).map(transformEvent);
+
+  // Sort by first schedule entry ascending.
+  events.sort((a, b) => a.startDateTime.localeCompare(b.startDateTime));
+
+  // Apply upcoming filter client-side (event_date no longer on events table).
+  if (upcomingOnly) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    events = events.filter(e => e.startDateTime >= today.toISOString());
+  }
+
+  if (limit) events = events.slice(0, limit);
 
   // Client-side filtering for fields not easily filtered in SQL.
   return events.filter(event => {
@@ -109,22 +109,24 @@ export async function getEventBySlug(slug: string): Promise<Event | null> {
  * Fetch trending events sorted by likes (descending).
  */
 export async function getTrendingEvents(limit = 6): Promise<Event[]> {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
   const { data, error } = await getClient()
     .from('events')
     .select(EVENT_SELECT)
-    .gte('event_date', today.toISOString())
     .order('likes', { ascending: false })
-    .limit(limit);
+    .limit(limit * 3);
 
   if (error) {
     console.error('[supabase_lib] getTrendingEvents error:', error.message);
     return [];
   }
 
-  return (data as unknown as EventWithRelations[]).map(transformEvent);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  return (data as unknown as EventWithRelations[])
+    .map(transformEvent)
+    .filter(e => e.startDateTime >= today.toISOString())
+    .slice(0, limit);
 }
 
 /**

@@ -5,6 +5,7 @@ import type {
   CityRow,
   CategoryRow,
   Event,
+  EventSchedule,
   Society,
   University,
   Category,
@@ -53,22 +54,39 @@ export function transformEvent(row: EventWithRelations): Event {
   );
   const imageUrl = sortedImages[0]?.post_images?.s3_url ?? '';
 
+  // Derive start/end/location from schedule_entries.
+  const sortedEntries = [...(row.schedule_entries ?? [])].sort(
+    (a, b) => a.schedule_order - b.schedule_order
+  );
+  const startEntry = sortedEntries.find(e => !e.is_end_schedule) ?? null;
+  const endEntry = sortedEntries.find(e => e.is_end_schedule) ?? null;
+
+  const schedules: EventSchedule[] = sortedEntries.map(e => ({
+    scheduledAt: e.scheduled_at,
+    isEnd: e.is_end_schedule,
+    order: e.schedule_order,
+    locationName: e.locations?.name ?? null,
+    locationGoogleMapsUrl: e.locations?.google_maps_url ?? null,
+  }));
+
   return {
     id: row.id,
     slug: generateSlug(row.title),
     title: row.title,
     description: row.description,
-    startDateTime: row.event_date,
-    endDateTime: row.event_end ?? undefined,
+    startDateTime: startEntry?.scheduled_at ?? '',
+    endDateTime: endEntry?.scheduled_at ?? undefined,
     city: university?.cities?.name ?? 'Unknown',
     university: university?.name ?? 'University of Manchester',
     societyName: society?.name ?? 'Unknown Society',
-    locationName: row.location,
+    locationName: startEntry?.locations?.name ?? '',
+    locationGoogleMapsUrl: startEntry?.locations?.google_maps_url ?? null,
+    schedules,
     imageUrl,
     externalUrl: row.registration_url ?? row.source_post_url ?? '',
     tags: category ? [capitalizeCategory(category.name)] : ['General'],
     interestedCount: row.likes,
-    savedCount: Math.floor(row.likes * 0.3),
+    attendingCount: row.attending,
     createdAt: row.created_at,
     priceLabel: formatPriceLabel(row.is_free, row.price),
   };
@@ -92,6 +110,9 @@ export function transformUniversity(row: UniversityWithCity): University {
     name: row.name,
     shortName: row.short_name,
     cityName: row.cities?.name ?? null,
+    buildingUrl: row.building_url ?? null,
+    logoUrl: row.logo_url ?? null,
+    description: row.description ?? null,
   };
 }
 

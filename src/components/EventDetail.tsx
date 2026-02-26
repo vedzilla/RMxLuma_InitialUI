@@ -81,7 +81,7 @@ export default function EventDetail({ event, allEvents }: EventDetailProps) {
       {/* Social Proof */}
       <div className="flex items-center gap-6 mb-8 text-sm text-muted">
         <span>{event.interestedCount} interested</span>
-        <span>{event.savedCount} saved</span>
+        <span>{event.attendingCount} attending</span>
       </div>
 
       {/* CTAs */}

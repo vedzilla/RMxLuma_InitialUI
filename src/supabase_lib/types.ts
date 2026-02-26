@@ -4,19 +4,41 @@ export interface EventRow {
   id: string;
   title: string;
   description: string;
-  event_date: string;
-  event_end: string | null;
-  location: string;
   is_online: boolean;
   is_free: boolean;
   price: string | null;
   category_id: string;
   registration_url: string | null;
   likes: number;
+  attending: number;
   source_post_url: string | null;
   post_id: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface LocationRow {
+  id: string;
+  name: string;
+  street: string | null;
+  postcode: string | null;
+  google_maps_url: string | null;
+  city_id: string | null;
+  created_at: string;
+}
+
+export interface ScheduleEntryRow {
+  id: string;
+  event_id: string;
+  location_id: string | null;
+  scheduled_at: string;
+  is_end_schedule: boolean;
+  schedule_order: number;
+  created_at: string;
+}
+
+export interface ScheduleEntryWithLocation extends ScheduleEntryRow {
+  locations: Pick<LocationRow, 'id' | 'name' | 'google_maps_url'> | null;
 }
 
 export interface SocietyRow {
@@ -41,6 +63,9 @@ export interface UniversityRow {
   name: string;
   short_name: string;
   city_id: string | null;
+  building_url: string | null;
+  logo_url: string | null;
+  description: string | null;
   created_at: string;
 }
 
@@ -90,6 +115,7 @@ export interface EventWithRelations extends EventRow {
     image_index: number | null;
     post_images: Pick<PostImageRow, 's3_url'> | null;
   }>;
+  schedule_entries: ScheduleEntryWithLocation[];
 }
 
 // Shape returned by getSocieties() — societies with nested university.
@@ -98,6 +124,14 @@ export interface SocietyWithUniversity extends SocietyRow {
 }
 
 // ---- Transformed frontend types ----
+
+export interface EventSchedule {
+  scheduledAt: string;
+  isEnd: boolean;
+  order: number;
+  locationName: string | null;
+  locationGoogleMapsUrl: string | null;
+}
 
 export interface Event {
   id: string;
@@ -110,11 +144,13 @@ export interface Event {
   university: string;
   societyName: string;
   locationName: string;
+  locationGoogleMapsUrl: string | null;
+  schedules: EventSchedule[];
   imageUrl: string;
   externalUrl: string;
   tags: string[];
   interestedCount: number;
-  savedCount: number;
+  attendingCount: number;
   createdAt: string;
   priceLabel: string;
 }
@@ -134,6 +170,9 @@ export interface University {
   name: string;
   shortName: string;
   cityName: string | null;
+  buildingUrl: string | null;
+  logoUrl: string | null;
+  description: string | null;
 }
 
 export interface City {

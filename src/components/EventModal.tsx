@@ -174,7 +174,7 @@ export default function EventModal({ event, onClose }: EventModalProps) {
           {/* Social Proof */}
           <div className="flex items-center gap-6 mb-6 text-sm text-muted">
             <span>{event.interestedCount} interested</span>
-            <span>{event.savedCount} saved</span>
+            <span>{event.attendingCount} attending</span>
           </div>
 
           {/* Registration Section */}
