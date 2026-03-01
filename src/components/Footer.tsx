@@ -28,6 +28,11 @@ export default function Footer() {
                   About
                 </Link>
               </li>
+              <li>
+                <Link href="/support" className="text-sm text-muted hover:text-text transition-colors">
+                  Support
+                </Link>
+              </li>
             </ul>
           </div>
           
