@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Event } from '@/data/events';
@@ -33,9 +33,21 @@ export default function DiscoverPageClient({
   const [selectedTag, setSelectedTag] = useState<string | undefined>();
   const [sortBy, setSortBy] = useState<SortOption>('soonest');
 
+  // Start with the server order so SSR and client hydration match.
+  // After hydration, shuffle once client-side — stable for the session, resets on hard refresh.
+  const [shuffledEvents, setShuffledEvents] = useState<Event[]>(events);
+  useEffect(() => {
+    const arr = [...events];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    setShuffledEvents(arr);
+  }, []);
+
   const selectedEventSlug = searchParams.get('event');
   const selectedEvent = selectedEventSlug
-    ? events.find(e => e.slug === selectedEventSlug)
+    ? shuffledEvents.find(e => e.slug === selectedEventSlug)
     : null;
 
   const openEvent = (slug: string) => {
@@ -49,12 +61,12 @@ export default function DiscoverPageClient({
   };
 
   const filteredEvents = useMemo(() => {
-    let filtered = filterEvents(events, searchQuery, selectedTag);
+    let filtered = filterEvents(shuffledEvents, searchQuery, selectedTag);
     filtered = sortEvents(filtered, sortBy);
     return filtered;
-  }, [events, searchQuery, selectedTag, sortBy]);
+  }, [shuffledEvents, searchQuery, selectedTag, sortBy]);
 
-  const popularEvents = useMemo(() => events.slice(0, 6), [events]);
+  const popularEvents = useMemo(() => shuffledEvents.slice(0, 6), [shuffledEvents]);
 
   return (
     <>

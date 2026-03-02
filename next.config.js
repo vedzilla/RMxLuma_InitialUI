@@ -1,5 +1,3 @@
-require('dotenv').config({ path: '.env.public' });
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {

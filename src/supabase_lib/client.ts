@@ -1,14 +1,7 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-
-if (!supabaseUrl) {
-  throw new Error('Missing environment variable: PUBLIC_SUPABASE_URL');
-}
-if (!supabaseKey) {
-  throw new Error('Missing environment variable: PUBLIC_SUPABASE_PUBLISHABLE_KEY');
-}
+const supabaseUrl = 'https://ajwfegvmvmcddapigswd.supabase.co';
+const supabaseKey = 'sb_publishable_bytnAdiOEBVulOAT6wJjzA_LFDQN2xN';
 
 // Singleton client — safe to reuse across server component invocations.
 let _client: SupabaseClient | null = null;
