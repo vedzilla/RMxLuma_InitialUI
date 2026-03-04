@@ -80,7 +80,7 @@ export interface CategoryRow {
 
 export interface PostImageRow {
   id: string;
-  s3_url: string;
+  full_url: string;
   created_at: string;
 }
 
@@ -113,7 +113,7 @@ export interface EventWithRelations extends EventRow {
   event_images: Array<{
     post_id: string | null;
     image_index: number | null;
-    post_images: Pick<PostImageRow, 's3_url'> | null;
+    post_images: Pick<PostImageRow, 'full_url'> | null;
   }>;
   schedule_entries: ScheduleEntryWithLocation[];
 }

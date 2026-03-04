@@ -48,11 +48,11 @@ export function transformEvent(row: EventWithRelations): Event {
   const university = society?.universities ?? null;
   const category = row.categories;
 
-  // Pick the primary image: sort event_images by image_index, take the first s3_url.
+  // Pick the primary image: sort event_images by image_index, take the first full_url.
   const sortedImages = [...(row.event_images ?? [])].sort(
     (a, b) => (a.image_index ?? 0) - (b.image_index ?? 0)
   );
-  const imageUrl = sortedImages[0]?.post_images?.s3_url ?? '';
+  const imageUrl = sortedImages[0]?.post_images?.full_url ?? '';
 
   // Derive start/end/location from schedule_entries.
   const sortedEntries = [...(row.schedule_entries ?? [])].sort(

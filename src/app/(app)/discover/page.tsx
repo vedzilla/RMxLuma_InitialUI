@@ -29,19 +29,12 @@ async function DiscoverPage() {
     .sort((a, b) => b.eventCount - a.eventCount)
     .slice(0, 6);
 
-  // Compute event count per category tag
-  const categoryEventCounts: Record<string, number> = {};
-  tags.forEach(tag => {
-    categoryEventCounts[tag] = events.filter(e => e.tags.includes(tag)).length;
-  });
-
   return (
     <Suspense fallback={<div className="max-w-[1120px] mx-auto px-[18px] py-8">Loading...</div>}>
       <DiscoverPageClient
         events={events}
         tags={tags}
         societies={featuredSocieties}
-        categoryEventCounts={categoryEventCounts}
       />
     </Suspense>
   );

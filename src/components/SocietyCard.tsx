@@ -3,10 +3,11 @@ interface SocietyCardProps {
   category: string;
   eventCount: number;
   initials: string;
+  instagramHandle?: string;
 }
 
-export default function SocietyCard({ name, category, eventCount, initials }: SocietyCardProps) {
-  return (
+export default function SocietyCard({ name, category, eventCount, initials, instagramHandle }: SocietyCardProps) {
+  const content = (
     <div className="bg-surface border border-border rounded-[var(--radius)] p-4 flex items-center gap-3 cursor-pointer transition-all duration-[0.12s] shadow-[var(--shadowSoft)] hover:-translate-y-0.5 hover:shadow-[var(--shadow)] hover:border-text">
       <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[rgba(99,102,241,0.08)] to-[rgba(15,23,42,0.05)] border border-border grid place-items-center text-text font-semibold text-base flex-shrink-0">
         {initials}
@@ -21,6 +22,21 @@ export default function SocietyCard({ name, category, eventCount, initials }: So
       </div>
     </div>
   );
+
+  if (instagramHandle) {
+    return (
+      <a
+        href={`https://instagram.com/${instagramHandle}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="no-underline"
+      >
+        {content}
+      </a>
+    );
+  }
+
+  return content;
 }
 
 

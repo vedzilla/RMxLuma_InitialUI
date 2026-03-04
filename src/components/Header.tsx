@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -16,10 +17,25 @@ export default function Header({ cities, universities }: HeaderProps) {
     <div className="sticky top-0 z-10 bg-[rgba(250,250,250,0.85)] backdrop-blur-[10px] border-b border-border">
       <div className="max-w-[1120px] mx-auto px-[18px]">
         <div className="flex items-center justify-between gap-3 h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-baseline gap-1">
-            <span className="text-xl font-extrabold text-text tracking-[-0.02em]">RM</span>
-            <span className="w-2 h-2 rounded-full bg-red shadow-[0_0_12px_var(--redGlow),0_0_24px_var(--redGlow)] relative top-[-2px]" style={{ animation: 'pulse 2s ease-in-out infinite' }}></span>
+          {/* Logo — crossfade between dot and no-dot variants over 6s */}
+          <Link href="/" className="-ml-10 relative w-[128px] h-[128px] block flex-shrink-0">
+            <Image
+              src="/logos/rm-dot-logo.png"
+              alt="RedefineMe"
+              width={128}
+              height={128}
+              unoptimized
+              className="absolute inset-0 animate-[logoDotFade_6s_ease-in-out_infinite]"
+            />
+            <Image
+              src="/logos/rm-no-dot-logo.png"
+              alt=""
+              width={128}
+              height={128}
+              unoptimized
+              className="absolute inset-0"
+              aria-hidden
+            />
           </Link>
 
           {/* Navigation */}

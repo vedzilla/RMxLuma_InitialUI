@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 
 export default function Footer() {
@@ -6,9 +7,24 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <span className="text-lg font-bold text-text">RM</span>
-              <span className="w-2 h-2 rounded-full bg-red"></span>
+            <div className="relative w-[40px] h-[40px] mb-4">
+              <Image
+                src="/logos/rm-dot-logo.png"
+                alt="RedefineMe"
+                width={40}
+                height={40}
+                unoptimized
+                className="absolute inset-0 animate-[logoDotFade_6s_ease-in-out_infinite]"
+              />
+              <Image
+                src="/logos/rm-no-dot-logo.png"
+                alt=""
+                width={40}
+                height={40}
+                unoptimized
+                className="absolute inset-0 animate-[logoNoDotFade_6s_ease-in-out_infinite]"
+                aria-hidden
+              />
             </div>
             <p className="text-sm text-muted">
               Discover society events across the UK

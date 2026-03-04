@@ -13,7 +13,7 @@ const EVENT_SELECT = `
       universities(id, name, short_name, city_id, created_at, cities(id, name))
     )
   ),
-  event_images(post_id, image_index, post_images(s3_url)),
+  event_images(post_id, image_index, post_images(full_url)),
   schedule_entries(id, scheduled_at, is_end_schedule, schedule_order, location_id, locations(id, name, google_maps_url))
 `.trim();
 

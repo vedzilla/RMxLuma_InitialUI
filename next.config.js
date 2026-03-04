@@ -18,6 +18,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'scontent-man2-1.cdninstagram.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'redefine-me-image-bucket.s3.amazonaws.com',
+      },
     ],
   },
 }

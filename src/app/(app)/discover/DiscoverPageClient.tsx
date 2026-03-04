@@ -10,7 +10,6 @@ import SearchBar from '@/components/SearchBar';
 import FilterPills from '@/components/FilterPills';
 import SortDropdown from '@/components/SortDropdown';
 import EventCard from '@/components/EventCard';
-import CategoryCard from '@/components/CategoryCard';
 import SocietyCard from '@/components/SocietyCard';
 import EventModal from '@/components/EventModal';
 
@@ -18,14 +17,12 @@ interface DiscoverPageClientProps {
   events: Event[];
   tags: string[];
   societies: (Society & { eventCount: number; initials: string })[];
-  categoryEventCounts: Record<string, number>;
 }
 
 export default function DiscoverPageClient({
   events,
   tags,
   societies,
-  categoryEventCounts,
 }: DiscoverPageClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -66,8 +63,6 @@ export default function DiscoverPageClient({
     return filtered;
   }, [shuffledEvents, searchQuery, selectedTag, sortBy]);
 
-  const popularEvents = useMemo(() => shuffledEvents.slice(0, 6), [shuffledEvents]);
-
   return (
     <>
       <div className="max-w-[1120px] mx-auto px-[18px]">
@@ -92,45 +87,26 @@ export default function DiscoverPageClient({
           </div>
         </div>
 
-        {/* Popular Events */}
-        {!searchQuery && !selectedTag && (
-          <div className="mt-[26px]">
-            <div className="flex items-baseline justify-between gap-[10px]">
-              <h2 className="m-0 text-[18px] font-semibold text-text tracking-[-0.02em] leading-[1.2]">
-                Popular events
-              </h2>
-              <Link href="/all-events" className="text-text no-underline font-medium text-sm hover:underline hover:text-muted transition-colors">
-                See all
-              </Link>
-            </div>
+        {/* Upcoming Events */}
+        <div className="mt-[26px]">
+          <div className="flex items-baseline justify-between gap-[10px]">
+            <h2 className="m-0 text-[18px] font-semibold text-text tracking-[-0.02em] leading-[1.2]">
+              Upcoming events
+            </h2>
+            <Link href="/all-events" className="text-text no-underline font-medium text-sm hover:underline hover:text-muted transition-colors">
+              See all
+            </Link>
+          </div>
+          {filteredEvents.length > 0 ? (
             <div className="mt-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[14px]">
-              {popularEvents.map(event => (
+              {filteredEvents.slice(0, 6).map(event => (
                 <EventCard key={event.id} event={event} onClick={() => openEvent(event.slug)} />
               ))}
             </div>
-          </div>
-        )}
-
-        {/* Browse by Category */}
-        {!searchQuery && !selectedTag && tags.length > 0 && (
-          <div className="mt-[26px]">
-            <div className="flex items-baseline justify-between gap-[10px]">
-              <h2 className="m-0 text-[18px] font-semibold text-text tracking-[-0.02em] leading-[1.2]">
-                Browse by category
-              </h2>
-            </div>
-            <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-3">
-              {tags.slice(0, 8).map(category => (
-                <CategoryCard
-                  key={category}
-                  categoryName={category}
-                  count={categoryEventCounts[category] ?? 0}
-                  onClick={() => setSelectedTag(selectedTag === category ? undefined : category)}
-                />
-              ))}
-            </div>
-          </div>
-        )}
+          ) : (
+            <p className="mt-3 text-muted text-sm">No events match your search.</p>
+          )}
+        </div>
 
         {/* Featured Societies */}
         {!searchQuery && !selectedTag && societies.length > 0 && (
@@ -148,24 +124,8 @@ export default function DiscoverPageClient({
                   category={society.university}
                   eventCount={society.eventCount}
                   initials={society.initials}
+                  instagramHandle={society.instagram}
                 />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Search Results */}
-        {(searchQuery || selectedTag) && (
-          <div className="mt-[26px]">
-            <div className="flex items-baseline justify-between gap-[10px]">
-              <h2 className="m-0 text-[18px] font-semibold text-text tracking-[-0.02em] leading-[1.2]">
-                Search results
-              </h2>
-              <span className="text-sm text-muted">{filteredEvents.length} events</span>
-            </div>
-            <div className="mt-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[14px]">
-              {filteredEvents.map(event => (
-                <EventCard key={event.id} event={event} onClick={() => openEvent(event.slug)} />
               ))}
             </div>
           </div>

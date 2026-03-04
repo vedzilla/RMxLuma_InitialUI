@@ -41,6 +41,21 @@
     line-height: 1.2;
   }
 
+  /* Logo crossfade: 6s total cycle
+     0–83.3% (5s): dot visible, no-dot hidden
+     83.3–91.7% (0.5s): crossfade to no-dot
+     91.7–100% (0.5s): crossfade back to dot */
+  @keyframes logoDotFade {
+    0%, 83.3% { opacity: 1; }
+    91.7% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  @keyframes logoNoDotFade {
+    0%, 83.3% { opacity: 0; }
+    91.7% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
   @keyframes pulse {
     0%, 100% {
       opacity: 1;
