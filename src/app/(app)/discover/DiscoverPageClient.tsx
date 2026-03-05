@@ -124,6 +124,7 @@ export default function DiscoverPageClient({
                   category={society.university}
                   eventCount={society.eventCount}
                   initials={society.initials}
+                  imageUrl={society.imageUrl}
                   instagramHandle={society.instagram}
                 />
               ))}
