@@ -5,22 +5,22 @@ export default function Footer() {
   return (
     <footer className="border-t border-border bg-surface mt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
           <div>
-            <div className="relative w-[40px] h-[40px] mb-4">
+            <div className="relative w-[100px] h-[100px] mb-4">
               <Image
                 src="/logos/rm-dot-logo.png"
                 alt="RedefineMe"
-                width={40}
-                height={40}
+                width={100}
+                height={100}
                 unoptimized
                 className="absolute inset-0 animate-[logoDotFade_6s_ease-in-out_infinite]"
               />
               <Image
                 src="/logos/rm-no-dot-logo.png"
                 alt=""
-                width={40}
-                height={40}
+                width={100}
+                height={100}
                 unoptimized
                 className="absolute inset-0 animate-[logoNoDotFade_6s_ease-in-out_infinite]"
                 aria-hidden
@@ -64,7 +64,7 @@ export default function Footer() {
         </div>
         
         <div className="mt-8 pt-8 border-t border-border text-center text-sm text-muted">
-          <p>© 2024 Redefine Me. All rights reserved.</p>
+          <p>© 2026 Redefine Me. All rights reserved.</p>
         </div>
       </div>
     </footer>
