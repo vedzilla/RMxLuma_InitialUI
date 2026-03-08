@@ -10,6 +10,11 @@ export default async function LandingPage() {
     getEventUniversities(),
   ]);
 
+  const featuredUniversities = [...universities]
+    .sort(() => Math.random() - 0.5)
+    .slice(0, 3)
+    .map((u) => u.shortName);
+
   // Pick a random subset of societies for orbiting logos (up to 11)
   const shuffled = [...societies].sort(() => Math.random() - 0.5);
   const logoSocieties = shuffled.slice(0, 11).map((s) => ({
@@ -29,6 +34,7 @@ export default async function LandingPage() {
       logoSocieties={logoSocieties}
       cityNames={cityNames}
       universityNames={universityNames}
+      featuredUniversities={featuredUniversities}
     />
   );
 }

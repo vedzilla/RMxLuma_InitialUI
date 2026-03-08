@@ -14,6 +14,8 @@ export default function Header({ cities, universities }: HeaderProps) {
   const [showUniversitiesDropdown, setShowUniversitiesDropdown] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [hamburgerActive, setHamburgerActive] = useState(false);
+  const [mobileCitiesOpen, setMobileCitiesOpen] = useState(false);
+  const [mobileUnisOpen, setMobileUnisOpen] = useState(false);
 
   useEffect(() => {
     if (showMobileMenu) {
@@ -162,25 +164,55 @@ export default function Header({ cities, universities }: HeaderProps) {
           className="block px-3 py-2 text-sm font-medium text-text rounded-lg hover:bg-[rgba(15,23,42,0.04)] transition-colors">
           Discover
         </Link>
-        <div className="mt-3">
-          <p className="px-3 py-1 text-xs font-semibold text-muted uppercase tracking-wider">Cities</p>
-          {cities.map(city => (
-            <Link key={city} href={`/cities/${city.toLowerCase().replace(/\s+/g, '-')}`}
-              onClick={() => setShowMobileMenu(false)}
-              className="block px-3 py-2 text-sm text-text rounded-lg hover:bg-[rgba(15,23,42,0.04)] transition-colors">
-              {city}
-            </Link>
-          ))}
+        <div className="mt-1">
+          <button
+            onClick={() => setMobileCitiesOpen(o => !o)}
+            className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-text rounded-lg hover:bg-[rgba(15,23,42,0.04)] transition-colors bg-transparent border-none cursor-pointer"
+          >
+            Cities
+            <svg
+              className={`w-4 h-4 text-muted transition-transform duration-200${mobileCitiesOpen ? ' rotate-180' : ''}`}
+              fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          {mobileCitiesOpen && (
+            <div className="ml-3 mt-0.5">
+              {cities.map(city => (
+                <Link key={city} href={`/cities/${city.toLowerCase().replace(/\s+/g, '-')}`}
+                  onClick={() => setShowMobileMenu(false)}
+                  className="block px-3 py-2 text-sm text-text rounded-lg hover:bg-[rgba(15,23,42,0.04)] transition-colors">
+                  {city}
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
-        <div className="mt-3">
-          <p className="px-3 py-1 text-xs font-semibold text-muted uppercase tracking-wider">Universities</p>
-          {universities.map(uni => (
-            <Link key={uni} href={`/universities/${uni.toLowerCase().replace(/\s+/g, '-')}`}
-              onClick={() => setShowMobileMenu(false)}
-              className="block px-3 py-2 text-sm text-text rounded-lg hover:bg-[rgba(15,23,42,0.04)] transition-colors">
-              {uni}
-            </Link>
-          ))}
+        <div className="mt-1">
+          <button
+            onClick={() => setMobileUnisOpen(o => !o)}
+            className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-text rounded-lg hover:bg-[rgba(15,23,42,0.04)] transition-colors bg-transparent border-none cursor-pointer"
+          >
+            Universities
+            <svg
+              className={`w-4 h-4 text-muted transition-transform duration-200${mobileUnisOpen ? ' rotate-180' : ''}`}
+              fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          {mobileUnisOpen && (
+            <div className="ml-3 mt-0.5">
+              {universities.map(uni => (
+                <Link key={uni} href={`/universities/${uni.toLowerCase().replace(/\s+/g, '-')}`}
+                  onClick={() => setShowMobileMenu(false)}
+                  className="block px-3 py-2 text-sm text-text rounded-lg hover:bg-[rgba(15,23,42,0.04)] transition-colors">
+                  {uni}
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

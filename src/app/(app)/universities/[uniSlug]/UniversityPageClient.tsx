@@ -2,23 +2,43 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Event } from '@/data/events';
 import { filterEvents, sortEvents, SortOption } from '@/utils/eventUtils';
 import SearchBar from '@/components/SearchBar';
 import FilterPills from '@/components/FilterPills';
 import SortDropdown from '@/components/SortDropdown';
 import EventGrid from '@/components/EventGrid';
+import EventModal from '@/components/EventModal';
 
 interface UniversityPageClientProps {
+  uniSlug: string;
   universityName: string;
   events: Event[];
   tags: string[];
 }
 
-export default function UniversityPageClient({ universityName, events, tags }: UniversityPageClientProps) {
+export default function UniversityPageClient({ uniSlug, universityName, events, tags }: UniversityPageClientProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState<string | undefined>();
   const [sortBy, setSortBy] = useState<SortOption>('soonest');
+
+  const selectedEventSlug = searchParams.get('event');
+  const selectedEvent = selectedEventSlug
+    ? events.find(e => e.slug === selectedEventSlug)
+    : null;
+
+  const openEvent = (slug: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('event', slug);
+    router.push(`/universities/${uniSlug}?${params.toString()}`, { scroll: false });
+  };
+
+  const closeEvent = () => {
+    router.push(`/universities/${uniSlug}`, { scroll: false });
+  };
 
   const universityEvents = useMemo(() => {
     let filtered = filterEvents(events, searchQuery, selectedTag);
@@ -45,12 +65,16 @@ export default function UniversityPageClient({ universityName, events, tags }: U
       </div>
 
       {/* Search and Filters */}
-      <div className="mb-8 space-y-4">
-        <div className="flex flex-col sm:flex-row gap-4">
+      <div className="mb-8">
+        <div className="flex flex-wrap gap-3 mt-4 items-center">
           <SearchBar value={searchQuery} onChange={setSearchQuery} />
-          <SortDropdown value={sortBy} onChange={setSortBy} />
+          <div className="hidden md:block">
+            <SortDropdown value={sortBy} onChange={setSortBy} />
+          </div>
         </div>
-        <FilterPills tags={tags} selectedTag={selectedTag} onTagSelect={setSelectedTag} />
+        <div className="mt-3">
+          <FilterPills tags={tags} selectedTag={selectedTag} onTagSelect={setSelectedTag} />
+        </div>
       </div>
 
       {/* Events */}
@@ -59,8 +83,12 @@ export default function UniversityPageClient({ universityName, events, tags }: U
           <h2 className="text-xl font-semibold text-text">Events</h2>
           <span className="text-sm text-muted">{universityEvents.length} events</span>
         </div>
-        <EventGrid events={universityEvents} />
+        <EventGrid events={universityEvents} onEventClick={openEvent} />
       </div>
+
+      {selectedEvent && (
+        <EventModal event={selectedEvent} onClose={closeEvent} />
+      )}
     </div>
   );
 }

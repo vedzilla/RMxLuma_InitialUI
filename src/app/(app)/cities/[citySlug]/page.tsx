@@ -24,5 +24,5 @@ export default async function CityPage({ params }: PageProps) {
 
   const cityEvents = events.filter(e => e.city.toLowerCase() === city.name.toLowerCase());
 
-  return <CityPageClient cityName={city.name} events={cityEvents} tags={tags} />;
+  return <CityPageClient citySlug={citySlug} cityName={city.name} events={cityEvents} tags={tags} />;
 }

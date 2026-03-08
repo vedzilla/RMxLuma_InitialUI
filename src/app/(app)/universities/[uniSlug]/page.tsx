@@ -28,5 +28,5 @@ export default async function UniversityPage({ params }: PageProps) {
     e => e.university.toLowerCase() === universityName.toLowerCase()
   );
 
-  return <UniversityPageClient universityName={universityName} events={universityEvents} tags={tags} />;
+  return <UniversityPageClient uniSlug={uniSlug} universityName={universityName} events={universityEvents} tags={tags} />;
 }

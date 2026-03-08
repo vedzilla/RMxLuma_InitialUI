@@ -38,9 +38,10 @@ interface LandingPageClientProps {
   logoSocieties: LogoSociety[];
   cityNames: string[];
   universityNames: string[];
+  featuredUniversities: string[];
 }
 
-export default function LandingPageClient({ societyCount, universityCount, studentCount, societyNames, logoSocieties, cityNames, universityNames }: LandingPageClientProps) {
+export default function LandingPageClient({ societyCount, universityCount, studentCount, societyNames, logoSocieties, cityNames, universityNames, featuredUniversities }: LandingPageClientProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
@@ -133,10 +134,10 @@ export default function LandingPageClient({ societyCount, universityCount, stude
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.5 }}
-                className="text-muted text-[15px] mb-8"
+                className="text-muted text-[15px] mb-8 flex items-center justify-center lg:justify-start gap-1.5"
               >
-                Find events from{' '}
-                <span className="relative inline-block min-w-[180px] h-[24px] align-bottom">
+                <span>Find events from</span>
+                <span className="relative inline-block min-w-[180px] h-[22px]">
                   <AnimatePresence mode="wait">
                     <motion.span
                       key={currentIndex}
@@ -144,7 +145,7 @@ export default function LandingPageClient({ societyCount, universityCount, stude
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.3 }}
-                      className="absolute left-1/2 -translate-x-1/2 lg:left-0 lg:translate-x-0 font-semibold text-red whitespace-nowrap"
+                      className="absolute left-0 top-0 font-semibold text-red whitespace-nowrap"
                     >
                       {societyNames[currentIndex] ?? ''}
                     </motion.span>
@@ -280,9 +281,9 @@ export default function LandingPageClient({ societyCount, universityCount, stude
             {' '}— all in one place.
           </p>
           <div className="mt-6 flex justify-center items-center gap-10 opacity-40">
-            <span className="text-lg font-bold text-muted">UoM</span>
-            <span className="text-lg font-bold text-muted">MMU</span>
-            <span className="text-lg font-bold text-muted">Salford</span>
+            {featuredUniversities.map((name) => (
+              <span key={name} className="text-lg font-bold text-muted">{name}</span>
+            ))}
           </div>
         </div>
       </section>

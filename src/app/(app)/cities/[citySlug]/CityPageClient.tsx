@@ -2,23 +2,43 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Event } from '@/data/events';
 import { filterEvents, sortEvents, SortOption } from '@/utils/eventUtils';
 import SearchBar from '@/components/SearchBar';
 import FilterPills from '@/components/FilterPills';
 import SortDropdown from '@/components/SortDropdown';
 import EventGrid from '@/components/EventGrid';
+import EventModal from '@/components/EventModal';
 
 interface CityPageClientProps {
+  citySlug: string;
   cityName: string;
   events: Event[];
   tags: string[];
 }
 
-export default function CityPageClient({ cityName, events, tags }: CityPageClientProps) {
+export default function CityPageClient({ citySlug, cityName, events, tags }: CityPageClientProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState<string | undefined>();
   const [sortBy, setSortBy] = useState<SortOption>('soonest');
+
+  const selectedEventSlug = searchParams.get('event');
+  const selectedEvent = selectedEventSlug
+    ? events.find(e => e.slug === selectedEventSlug)
+    : null;
+
+  const openEvent = (slug: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('event', slug);
+    router.push(`/cities/${citySlug}?${params.toString()}`, { scroll: false });
+  };
+
+  const closeEvent = () => {
+    router.push(`/cities/${citySlug}`, { scroll: false });
+  };
 
   const cityEvents = useMemo(() => {
     let filtered = filterEvents(events, searchQuery, selectedTag);
@@ -43,12 +63,16 @@ export default function CityPageClient({ cityName, events, tags }: CityPageClien
         </Link>
       </div>
 
-      <div className="mb-8 space-y-4">
-        <div className="flex flex-col sm:flex-row gap-4">
+      <div className="mb-8">
+        <div className="flex flex-wrap gap-3 mt-4 items-center">
           <SearchBar value={searchQuery} onChange={setSearchQuery} />
-          <SortDropdown value={sortBy} onChange={setSortBy} />
+          <div className="hidden md:block">
+            <SortDropdown value={sortBy} onChange={setSortBy} />
+          </div>
         </div>
-        <FilterPills tags={tags} selectedTag={selectedTag} onTagSelect={setSelectedTag} />
+        <div className="mt-3">
+          <FilterPills tags={tags} selectedTag={selectedTag} onTagSelect={setSelectedTag} />
+        </div>
       </div>
 
       <div className="mb-6">
@@ -56,8 +80,12 @@ export default function CityPageClient({ cityName, events, tags }: CityPageClien
           <h2 className="text-xl font-semibold text-text">Events</h2>
           <span className="text-sm text-muted">{cityEvents.length} events</span>
         </div>
-        <EventGrid events={cityEvents} />
+        <EventGrid events={cityEvents} onEventClick={openEvent} />
       </div>
+
+      {selectedEvent && (
+        <EventModal event={selectedEvent} onClose={closeEvent} />
+      )}
     </div>
   );
 }
