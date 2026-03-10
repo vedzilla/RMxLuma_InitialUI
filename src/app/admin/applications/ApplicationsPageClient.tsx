@@ -11,7 +11,12 @@ interface Application {
   authUserId: string;
   societyId: string;
   societyName: string;
+  societyImageUrl: string | null;
+  universityName: string | null;
+  instagramHandle: string | null;
   appliedAt: string;
+  userName: string | null;
+  userEmail: string | null;
 }
 
 interface ApprovalStatus {
@@ -24,19 +29,15 @@ interface ApplicationsPageClientProps {
   approvalStatuses: ApprovalStatus[];
 }
 
-type ResolvingState = { id: string; action: 'approve' | 'deny' };
-
 export default function ApplicationsPageClient({
   initialApplications,
   approvalStatuses,
 }: ApplicationsPageClientProps) {
   const [applications, setApplications] = useState<Application[]>(initialApplications);
   const [search, setSearch] = useState('');
-  const [resolving, setResolving] = useState<ResolvingState | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleAction = useCallback(async (app: Application, action: 'approve' | 'deny') => {
-    setResolving({ id: app.id, action });
     setError(null);
 
     const statusName = action === 'approve' ? 'approved' : 'rejected';
@@ -44,9 +45,11 @@ export default function ApplicationsPageClient({
 
     if (!statusId) {
       setError(`Could not find "${statusName}" status. Please refresh and try again.`);
-      setResolving(null);
       return;
     }
+
+    // Optimistic: remove immediately
+    setApplications((prev) => prev.filter((a) => a.id !== app.id));
 
     try {
       const supabase = createAuthBrowserClient();
@@ -54,7 +57,7 @@ export default function ApplicationsPageClient({
 
       if (!session) {
         setError('Session expired. Please sign in again.');
-        setResolving(null);
+        setApplications((prev) => [...prev, app]);
         return;
       }
 
@@ -74,24 +77,26 @@ export default function ApplicationsPageClient({
         }
       );
 
-      if (res.ok) {
-        setApplications((prev) => prev.filter((a) => a.id !== app.id));
-      } else {
+      if (!res.ok) {
         const body = await res.text();
         setError(`Failed to ${action}: ${body || res.statusText}`);
+        setApplications((prev) => [...prev, app]);
       }
     } catch (err) {
       setError(`Network error: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      setApplications((prev) => [...prev, app]);
     }
-
-    setResolving(null);
   }, [approvalStatuses]);
 
   const query = search.toLowerCase().trim();
   const filtered = applications.filter(
     (a) =>
       a.societyName.toLowerCase().includes(query) ||
-      a.authUserId.toLowerCase().includes(query)
+      a.authUserId.toLowerCase().includes(query) ||
+      (a.universityName?.toLowerCase().includes(query) ?? false) ||
+      (a.instagramHandle?.toLowerCase().includes(query) ?? false) ||
+      (a.userName?.toLowerCase().includes(query) ?? false) ||
+      (a.userEmail?.toLowerCase().includes(query) ?? false)
   );
 
   // Group by society
@@ -170,7 +175,7 @@ export default function ApplicationsPageClient({
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by society or user ID..."
+            placeholder="Search by name, email, society, university, or handle..."
             className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-sm placeholder:text-[var(--muted)] outline-none transition-shadow focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent"
           />
         </div>
@@ -192,40 +197,65 @@ export default function ApplicationsPageClient({
                 className="bg-[var(--surface)] rounded-[var(--radius)] border border-[var(--border)] overflow-hidden"
               >
                 {/* Society header */}
-                <div className="px-5 py-3 border-b border-[var(--border)] bg-[var(--bg)]">
-                  <h2 className="text-sm font-semibold text-[var(--text)]">
-                    {society}
-                    <span className="ml-2 text-xs font-normal text-[var(--muted)]">
-                      {grouped[society].length} application{grouped[society].length !== 1 ? 's' : ''}
-                    </span>
-                  </h2>
-                </div>
+                {(() => {
+                  const firstApp = grouped[society][0];
+                  return (
+                    <div className="px-5 py-3 border-b border-[var(--border)] bg-[var(--bg)] flex items-center gap-3">
+                      {firstApp.societyImageUrl && (
+                        <Image
+                          src={firstApp.societyImageUrl}
+                          alt={society}
+                          width={32}
+                          height={32}
+                          className="rounded-full object-cover shrink-0"
+                        />
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <h2 className="text-sm font-semibold text-[var(--text)]">
+                          {society}
+                          <span className="ml-2 text-xs font-normal text-[var(--muted)]">
+                            {grouped[society].length} application{grouped[society].length !== 1 ? 's' : ''}
+                          </span>
+                        </h2>
+                        <div className="flex items-center gap-2 text-xs text-[var(--muted)]">
+                          {firstApp.universityName && <span>{firstApp.universityName}</span>}
+                          {firstApp.universityName && firstApp.instagramHandle && <span>&middot;</span>}
+                          {firstApp.instagramHandle && <span>@{firstApp.instagramHandle}</span>}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 {/* Applicant rows */}
                 <div className="divide-y divide-[var(--border)]">
                   {grouped[society].map((app) => {
-                    const isResolving = resolving?.id === app.id;
-                    const action = resolving?.action;
-
                     return (
                       <div
                         key={app.id}
-                        className="px-5 py-3.5 flex items-center justify-between gap-4 transition-all duration-500"
-                        style={{
-                          backgroundColor: isResolving
-                            ? action === 'approve'
-                              ? 'rgba(34, 197, 94, 0.1)'
-                              : 'rgba(239, 68, 68, 0.1)'
-                            : undefined,
-                          opacity: isResolving ? 0.5 : 1,
-                        }}
+                        className="px-5 py-3.5 flex items-center justify-between gap-4"
                       >
                         {/* Left: user info */}
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-xs text-[var(--muted)] font-mono">
-                              {app.authUserId.slice(0, 8)}...
-                            </span>
+                            {app.userName || app.userEmail ? (
+                              <>
+                                {app.userName && (
+                                  <span className="text-sm font-medium text-[var(--text)]">
+                                    {app.userName}
+                                  </span>
+                                )}
+                                {app.userEmail && (
+                                  <span className="text-xs text-[var(--muted)]">
+                                    {app.userEmail}
+                                  </span>
+                                )}
+                              </>
+                            ) : (
+                              <span className="text-xs text-[var(--muted)] font-mono">
+                                {app.authUserId.slice(0, 8)}...
+                              </span>
+                            )}
                           </div>
                           <div className="flex items-center gap-3 mt-1 text-xs text-[var(--muted)]">
                             <span>Applied {new Date(app.appliedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
@@ -236,15 +266,13 @@ export default function ApplicationsPageClient({
                         <div className="flex items-center gap-2 shrink-0">
                           <button
                             onClick={() => handleAction(app, 'approve')}
-                            disabled={!!resolving}
-                            className="px-3.5 py-1.5 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-3.5 py-1.5 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-colors"
                           >
                             Approve
                           </button>
                           <button
                             onClick={() => handleAction(app, 'deny')}
-                            disabled={!!resolving}
-                            className="px-3.5 py-1.5 rounded-lg text-xs font-medium bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-3.5 py-1.5 rounded-lg text-xs font-medium bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 transition-colors"
                           >
                             Deny
                           </button>

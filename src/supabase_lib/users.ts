@@ -71,3 +71,44 @@ export async function isAdmin(
   const roles = await getUserRoles(supabase, userId);
   return roles.includes('admin');
 }
+
+/**
+ * Fetch name and email for a user with a pending society account
+ * via the get-society-user-details edge function.
+ */
+export async function getSocietyUserDetails(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<{ email: string | null; name: string | null }> {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      console.error('[supabase_lib] getSocietyUserDetails: no active session');
+      return { email: null, name: null };
+    }
+
+    const res = await fetch(
+      `${SUPABASE_URL}/functions/v1/get-society-user-details`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ user_id: userId }),
+      }
+    );
+
+    if (!res.ok) {
+      console.error('[supabase_lib] getSocietyUserDetails error: HTTP', res.status);
+      return { email: null, name: null };
+    }
+
+    const data = await res.json();
+    console.log('[supabase_lib] getSocietyUserDetails:', userId, data);
+    return { email: data.email ?? null, name: data.name ?? null };
+  } catch (err) {
+    console.error('[supabase_lib] getSocietyUserDetails error:', err);
+    return { email: null, name: null };
+  }
+}

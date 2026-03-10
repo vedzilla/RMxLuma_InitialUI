@@ -71,7 +71,7 @@ export { getCategories } from './categories';
 export { getCities, getCityBySlug } from './cities';
 
 // Users
-export { getUserCount, getUserRole, getUserRoles, isAdmin } from './users';
+export { getUserCount, getUserRole, getUserRoles, isAdmin, getSocietyUserDetails } from './users';
 
 // Transform utilities (useful if callers have raw DB rows)
 export {
