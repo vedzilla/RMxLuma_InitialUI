@@ -52,10 +52,10 @@ export default function AuthForm() {
         {/* Card */}
         <div className="bg-[var(--surface)] rounded-[var(--radius)] shadow-[var(--shadow)] p-8">
           <h1 className="text-xl font-semibold text-[var(--text)] text-center mb-1">
-            Admin Login
+            Sign In
           </h1>
           <p className="text-sm text-[var(--muted)] text-center mb-6">
-            Sign in to the admin dashboard
+            Sign in to RedefineMe
           </p>
 
           {unauthorizedError && (

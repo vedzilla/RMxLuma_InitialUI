@@ -5,31 +5,27 @@ import { NextResponse } from 'next/server';
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
-  const rawNext = searchParams.get('next') ?? '/admin';
-  const safeNext = (rawNext.startsWith('/') && !rawNext.startsWith('//') && !rawNext.includes('://'))
-    ? rawNext
-    : '/admin';
 
   if (code) {
     const supabase = await createAuthServerClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      // Check that the authenticated user has an admin role
       const { data: { user } } = await supabase.auth.getUser();
 
-      if (!user || !(await isAdmin(supabase, user.id))) {
-        // Not an admin — sign them out and redirect with error
-        await supabase.auth.signOut();
-        return NextResponse.redirect(`${origin}/auth?error=unauthorized`);
-      }
+      if (user) {
+        // Role-based redirect: admins → /admin, everyone else → /society/dashboard
+        const destination = (await isAdmin(supabase, user.id))
+          ? '/admin'
+          : '/society/dashboard';
 
-      const forwardedHost = request.headers.get('x-forwarded-host');
-      if (forwardedHost) {
-        const proto = request.headers.get('x-forwarded-proto') || 'https';
-        return NextResponse.redirect(`${proto}://${forwardedHost}${safeNext}`);
+        const forwardedHost = request.headers.get('x-forwarded-host');
+        if (forwardedHost) {
+          const proto = request.headers.get('x-forwarded-proto') || 'https';
+          return NextResponse.redirect(`${proto}://${forwardedHost}${destination}`);
+        }
+        return NextResponse.redirect(`${origin}${destination}`);
       }
-      return NextResponse.redirect(`${origin}${safeNext}`);
     }
   }
 

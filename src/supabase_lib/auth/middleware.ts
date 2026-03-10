@@ -53,5 +53,14 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
+  if (request.nextUrl.pathname.startsWith('/society/dashboard')) {
+    if (!user) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/auth';
+      return NextResponse.redirect(url);
+    }
+    // No admin role check — any authenticated user is allowed
+  }
+
   return response;
 }
