@@ -17,7 +17,7 @@ export async function GET(request: Request) {
         // Role-based redirect: admins → /admin, everyone else → /society/dashboard
         const destination = (await isAdmin(supabase, user.id))
           ? '/admin'
-          : '/society/dashboard';
+          : '/society';
 
         const forwardedHost = request.headers.get('x-forwarded-host');
         if (forwardedHost) {

@@ -53,7 +53,7 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  if (request.nextUrl.pathname.startsWith('/society/dashboard')) {
+  if (request.nextUrl.pathname.startsWith('/society')) {
     if (!user) {
       const url = request.nextUrl.clone();
       url.pathname = '/auth';
