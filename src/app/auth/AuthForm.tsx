@@ -26,7 +26,7 @@ export default function AuthForm() {
       });
 
       if (error) {
-        setError(error.message);
+        setError('Sign in failed. Please try again.');
         setLoading(null);
       }
     } catch {

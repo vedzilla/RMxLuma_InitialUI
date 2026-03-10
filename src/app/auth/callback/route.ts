@@ -5,7 +5,10 @@ import { NextResponse } from 'next/server';
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
-  const next = searchParams.get('next') ?? '/admin';
+  const rawNext = searchParams.get('next') ?? '/admin';
+  const safeNext = (rawNext.startsWith('/') && !rawNext.startsWith('//') && !rawNext.includes('://'))
+    ? rawNext
+    : '/admin';
 
   if (code) {
     const supabase = await createAuthServerClient();
@@ -24,9 +27,9 @@ export async function GET(request: Request) {
       const forwardedHost = request.headers.get('x-forwarded-host');
       if (forwardedHost) {
         const proto = request.headers.get('x-forwarded-proto') || 'https';
-        return NextResponse.redirect(`${proto}://${forwardedHost}${next}`);
+        return NextResponse.redirect(`${proto}://${forwardedHost}${safeNext}`);
       }
-      return NextResponse.redirect(`${origin}${next}`);
+      return NextResponse.redirect(`${origin}${safeNext}`);
     }
   }
 
