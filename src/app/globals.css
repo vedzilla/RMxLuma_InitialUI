@@ -1,25 +1,135 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-@layer base {
-  :root {
-    --bg: #FAFAFA;
-    --surface: #FFFFFF;
-    --text: #0F172A;
-    --muted: #64748B;
-    --border: #E5E7EB;
-    --accent: #6366F1;
-    --accentHover: #4F46E5;
-    --accentSoft: #EEF2FF;
-    --red: #EF4444;
-    --redGlow: rgba(239, 68, 68, 0.4);
-    --redSoft: rgba(239, 68, 68, 0.1);
-    --radius: 16px;
-    --shadow: 0 6px 24px rgba(15, 23, 42, 0.08);
-    --shadowSoft: 0 4px 14px rgba(15, 23, 42, 0.06);
+@custom-variant dark (&:is(.dark *));
+
+/* ── Tailwind 4 theme: map CSS variables to Tailwind utilities ── */
+@theme inline {
+  /* Existing web-app tokens (used via bg-bg, text-text, etc.) */
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-text: var(--text);
+  --color-muted-legacy: var(--muted);
+  --color-accent-legacy: var(--accent);
+  --color-accentHover: var(--accentHover);
+  --color-accentSoft: var(--accentSoft);
+  --color-red: var(--red);
+  --color-redGlow: var(--redGlow);
+  --color-redSoft: var(--redSoft);
+
+  /* shadcn/ui tokens (used by dashboard components) */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted-bg);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent-bg);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* Sidebar tokens */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Radii */
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.25);
+  --radius-2xl: calc(var(--radius) * 1.5);
+
+  /* Fonts */
+  --font-sans: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
+
+  /* Shadows (existing web app) */
+  --shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 6px 24px rgba(15, 23, 42, 0.08);
+
+  /* Aurora animation */
+  --animate-aurora: aurora 60s linear infinite;
+
+  @keyframes aurora {
+    from { background-position: 50% 50%, 50% 50%; }
+    to { background-position: 350% 50%, 350% 50%; }
   }
+}
 
+/* ── Existing web-app root variables ── */
+:root {
+  --bg: #FAFAFA;
+  --surface: #FFFFFF;
+  --text: #0F172A;
+  --muted: #64748B;
+  --border: #E5E7EB;
+  --accent: #6366F1;
+  --accentHover: #4F46E5;
+  --accentSoft: #EEF2FF;
+  --red: #EF4444;
+  --redGlow: rgba(239, 68, 68, 0.4);
+  --redSoft: rgba(239, 68, 68, 0.1);
+  --radius: 16px;
+  --shadow: 0 6px 24px rgba(15, 23, 42, 0.08);
+  --shadowSoft: 0 4px 14px rgba(15, 23, 42, 0.06);
+}
+
+/* ── shadcn/ui variables (dashboard uses these) ── */
+:root {
+  --background: #FAFAFA;
+  --foreground: #1C1C1E;
+  --card: #FFFFFF;
+  --card-foreground: #1C1C1E;
+  --popover: #FFFFFF;
+  --popover-foreground: #1C1C1E;
+  --primary: #C04138;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F2F2F7;
+  --secondary-foreground: #1C1C1E;
+  --muted-bg: #F2F2F7;
+  --muted-foreground: #8E8E93;
+  --accent-bg: #F5C4C2;
+  --accent-foreground: #1C1C1E;
+  --destructive: #FF3B30;
+  --input: #E5E5EA;
+  --ring: #C04138;
+  --chart-1: #C04138;
+  --chart-2: #E8765E;
+  --chart-3: #F2A07B;
+  --chart-4: #F7C59F;
+  --chart-5: #FAEBD7;
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #1C1C1E;
+  --sidebar-primary: #C04138;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #FFF1F0;
+  --sidebar-accent-foreground: #1C1C1E;
+  --sidebar-border: #E5E5EA;
+  --sidebar-ring: #C04138;
+}
+
+/* ── Base styles ── */
+@layer base {
   * {
     box-sizing: border-box;
   }
@@ -40,49 +150,52 @@
     font-weight: 600;
     line-height: 1.2;
   }
+}
 
-  /* Logo crossfade: 6s total cycle
-     0–83.3% (5s): dot visible, no-dot hidden
-     83.3–91.7% (0.5s): crossfade to no-dot
-     91.7–100% (0.5s): crossfade back to dot */
-  @keyframes logoDotFade {
-    0%, 83.3% { opacity: 1; }
-    91.7% { opacity: 0; }
-    100% { opacity: 1; }
-  }
-  @keyframes logoNoDotFade {
-    0%, 83.3% { opacity: 0; }
-    91.7% { opacity: 1; }
-    100% { opacity: 0; }
-  }
+/* ── Dashboard scope: apply shadcn base styles only inside dashboard ── */
+.dashboard-scope * {
+  border-color: var(--border);
+}
 
-  @keyframes pulse {
-    0%, 100% {
-      opacity: 1;
-      transform: scale(1);
-    }
-    50% {
-      opacity: 0.8;
-      transform: scale(1.1);
-    }
-  }
+.dashboard-scope {
+  background: var(--background);
+  color: var(--foreground);
+}
 
-  .animate-pulse {
-    animation: pulse 2s ease-in-out infinite;
-  }
+/* ── Logo crossfade: 6s total cycle ── */
+@keyframes logoDotFade {
+  0%, 83.3% { opacity: 1; }
+  91.7% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@keyframes logoNoDotFade {
+  0%, 83.3% { opacity: 0; }
+  91.7% { opacity: 1; }
+  100% { opacity: 0; }
+}
 
-  @keyframes slide-in-from-right {
-    from {
-      transform: translateX(100%);
-    }
-    to {
-      transform: translateX(0);
-    }
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
   }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
+}
 
-  .animate-in {
-    animation: slide-in-from-right 0.3s ease-out;
-  }
+.animate-pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes slide-in-from-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.animate-in {
+  animation: slide-in-from-right 0.3s ease-out;
 }
 
 /* ── Emphatic hamburger (jonsuh.com/hamburgers) ── */
