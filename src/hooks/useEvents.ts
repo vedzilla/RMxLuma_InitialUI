@@ -4,6 +4,11 @@ import { useState, useCallback } from "react";
 import type { DashboardEvent } from "@/lib/supabase/types";
 import { mockEvents } from "@/lib/mock-data";
 
+// WARNING: All mutations (createEvent, updateEvent, deleteEvent) are currently mock implementations
+// that only modify local state. When replacing with real Supabase calls, ensure that:
+// 1. Supabase RLS policies restrict writes to events owned by the caller's society
+// 2. OR edge functions verify society ownership before performing mutations
+// Do NOT rely solely on the client-side layout auth check for authorization.
 export function useEvents(societyId: string | undefined) {
   const [events, setEvents] = useState<DashboardEvent[]>(mockEvents);
   const [loading, setLoading] = useState(false);

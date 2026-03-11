@@ -53,6 +53,14 @@ export default function ApplicationsPageClient({
 
     try {
       const supabase = createAuthBrowserClient();
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        setError('Session expired. Please sign in again.');
+        setApplications((prev) => [...prev, app]);
+        return;
+      }
+
       const { data: { session } } = await supabase.auth.getSession();
 
       if (!session) {

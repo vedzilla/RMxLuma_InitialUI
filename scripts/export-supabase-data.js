@@ -1,6 +1,10 @@
+// ⚠️  WARNING: This script may use the SERVICE ROLE KEY which bypasses all RLS policies.
+// It will export ALL data from ALL tables without access control.
+// Only run this in a trusted local environment. Never run in CI/CD or production.
 const { createClient } = require('@supabase/supabase-js')
 const fs = require('fs')
 const path = require('path')
+const readline = require('readline')
 
 // Load environment variables
 require('dotenv').config({ path: '.env.local' })
@@ -132,10 +136,19 @@ async function exportTables(tableNames, exportDir) {
   console.log(`  Total rows: ${Object.values(metadata.tables).reduce((sum, t) => sum + (t.rowCount || 0), 0)}`)
 }
 
-// Run the export
-exportDatabase()
-  .then(() => process.exit(0))
-  .catch(err => {
-    console.error(err)
-    process.exit(1)
-  })
+// Prompt for confirmation before running
+const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
+const keyType = process.env.SUPABASE_SERVICE_ROLE_KEY ? 'SERVICE ROLE KEY (bypasses RLS)' : 'anon key'
+rl.question(`\n⚠️  This will export data using: ${keyType}\nContinue? (y/N) `, (answer) => {
+  rl.close()
+  if (answer.toLowerCase() !== 'y') {
+    console.log('Aborted.')
+    process.exit(0)
+  }
+  exportDatabase()
+    .then(() => process.exit(0))
+    .catch(err => {
+      console.error(err)
+      process.exit(1)
+    })
+})

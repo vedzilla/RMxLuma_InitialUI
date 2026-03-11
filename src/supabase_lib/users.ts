@@ -1,6 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = 'https://ajwfegvmvmcddapigswd.supabase.co';
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 
 /**
  * Fetch the total number of users (students) via the user-count edge function.
@@ -81,6 +81,12 @@ export async function getSocietyUserDetails(
   userId: string
 ): Promise<{ email: string | null; name: string | null }> {
   try {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      console.error('[supabase_lib] getSocietyUserDetails: no authenticated user');
+      return { email: null, name: null };
+    }
+
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       console.error('[supabase_lib] getSocietyUserDetails: no active session');
@@ -105,7 +111,6 @@ export async function getSocietyUserDetails(
     }
 
     const data = await res.json();
-    console.log('[supabase_lib] getSocietyUserDetails:', userId, data);
     return { email: data.email ?? null, name: data.name ?? null };
   } catch (err) {
     console.error('[supabase_lib] getSocietyUserDetails error:', err);

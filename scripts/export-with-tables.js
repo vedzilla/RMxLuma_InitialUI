@@ -1,6 +1,10 @@
+// ⚠️  WARNING: This script may use the SECRET KEY which bypasses all RLS policies.
+// It will export ALL data from ALL tables (including users, user_interactions, user_follows)
+// without access control. Only run this in a trusted local environment.
 const { createClient } = require('@supabase/supabase-js')
 const fs = require('fs')
 const path = require('path')
+const readline = require('readline')
 
 // Load environment variables
 require('dotenv').config({ path: '.env.local' })
@@ -110,9 +114,19 @@ async function main() {
   console.log(`\n✅ Export complete! Files saved to: ${exportDir}`)
 }
 
-main()
-  .then(() => process.exit(0))
-  .catch(err => {
-    console.error('❌ Export failed:', err.message)
-    process.exit(1)
-  })
+// Prompt for confirmation before running
+const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
+const keyType = process.env.SUPABASE_SECRET_KEY ? 'SECRET KEY (bypasses RLS)' : 'publishable key'
+rl.question(`\n⚠️  This will export ${TABLES.length} tables using: ${keyType}\nContinue? (y/N) `, (answer) => {
+  rl.close()
+  if (answer.toLowerCase() !== 'y') {
+    console.log('Aborted.')
+    process.exit(0)
+  }
+  main()
+    .then(() => process.exit(0))
+    .catch(err => {
+      console.error('❌ Export failed:', err.message)
+      process.exit(1)
+    })
+})
