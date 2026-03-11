@@ -58,7 +58,7 @@ export default function Header({ cities, universities }: HeaderProps) {
           </Link>
 
           {/* Navigation */}
-          <nav className="hidden md:flex items-center gap-[14px] text-muted font-medium text-sm tracking-[-0.01em]">
+          <nav className="desktop-only flex items-center gap-[14px] text-subtle font-medium text-sm tracking-[-0.01em]">
             <Link href="/" className="text-inherit no-underline px-[10px] py-2 rounded-[10px] hover:bg-[rgba(15,23,42,0.04)] hover:text-text transition-colors">
               Discover
             </Link>
@@ -119,7 +119,7 @@ export default function Header({ cities, universities }: HeaderProps) {
               Get the App
             </Link>
             <button
-              className="hamburger hamburger--emphatic md:hidden"
+              className="hamburger hamburger--emphatic mobile-only"
               onClick={() => setShowMobileMenu(true)}
               aria-label="Open menu"
               style={{ opacity: showMobileMenu ? 0 : 1, transition: 'opacity 0.2s', pointerEvents: showMobileMenu ? 'none' : 'auto' }}
@@ -135,14 +135,14 @@ export default function Header({ cities, universities }: HeaderProps) {
 
     {/* Backdrop */}
     <div
-      className="fixed inset-0 bg-black/20 z-[150] md:hidden transition-opacity duration-500"
+      className="fixed inset-0 bg-black/20 z-[150] mobile-only transition-opacity duration-500"
       style={{ opacity: showMobileMenu ? 1 : 0, pointerEvents: showMobileMenu ? 'auto' : 'none' }}
       onClick={handleClose}
     />
 
     {/* Slide-out panel */}
     <div
-      className="fixed top-0 right-0 h-full w-[300px] bg-[#FAFAFA] z-[200] md:hidden shadow-[-4px_0_20px_rgba(0,0,0,0.08)] transition-transform duration-500 ease-out"
+      className="fixed top-0 right-0 h-full w-[300px] bg-[#FAFAFA] z-[200] mobile-only shadow-[-4px_0_20px_rgba(0,0,0,0.08)] transition-transform duration-500 ease-out"
       style={{ transform: showMobileMenu ? 'translateX(0)' : 'translateX(100%)' }}
     >
       {/* Hamburger — slides in with panel, animates ☰ → X */}
@@ -171,7 +171,7 @@ export default function Header({ cities, universities }: HeaderProps) {
           >
             Cities
             <svg
-              className={`w-4 h-4 text-muted transition-transform duration-200${mobileCitiesOpen ? ' rotate-180' : ''}`}
+              className={`w-4 h-4 text-subtle transition-transform duration-200${mobileCitiesOpen ? ' rotate-180' : ''}`}
               fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
             >
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -196,7 +196,7 @@ export default function Header({ cities, universities }: HeaderProps) {
           >
             Universities
             <svg
-              className={`w-4 h-4 text-muted transition-transform duration-200${mobileUnisOpen ? ' rotate-180' : ''}`}
+              className={`w-4 h-4 text-subtle transition-transform duration-200${mobileUnisOpen ? ' rotate-180' : ''}`}
               fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
             >
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />

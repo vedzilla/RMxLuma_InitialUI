@@ -10,9 +10,9 @@
   --color-bg: var(--bg);
   --color-surface: var(--surface);
   --color-text: var(--text);
-  --color-muted-legacy: var(--muted);
-  --color-accent-legacy: var(--accent);
-  --color-accentHover: var(--accentHover);
+  --color-subtle: var(--muted);
+  --color-brand: var(--accent);
+  --color-brand-hover: var(--accentHover);
   --color-accentSoft: var(--accentSoft);
   --color-red: var(--red);
   --color-redGlow: var(--redGlow);
@@ -196,6 +196,14 @@
 
 .animate-in {
   animation: slide-in-from-right 0.3s ease-out;
+}
+
+/* ── 750px breakpoint: hide mobile-only elements on desktop ── */
+@media (min-width: 751px) {
+  .mobile-only { display: none !important; }
+}
+@media (max-width: 750px) {
+  .desktop-only { display: none !important; }
 }
 
 /* ── Emphatic hamburger (jonsuh.com/hamburgers) ── */
