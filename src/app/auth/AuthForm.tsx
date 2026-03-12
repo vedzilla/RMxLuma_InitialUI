@@ -21,7 +21,7 @@ export default function AuthForm() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: 'https://redefine-me.com/auth/callback',
         },
       });
 
