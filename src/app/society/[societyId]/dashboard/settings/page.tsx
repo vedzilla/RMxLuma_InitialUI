@@ -1,9 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter, useParams } from "next/navigation";
+import Cropper, { type Area } from "react-easy-crop";
 import { useSocietyAuth } from "@/hooks/useSocietyAuth";
 import { createAuthBrowserClient } from "@/supabase_lib/auth/browser";
+import {
+  getSocietyProfileData,
+  updateSocietyProfileDetails,
+  updateSocietyProfileImage,
+} from "@/supabase_lib/societies";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,7 +17,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Instagram, LogOut } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Image, Instagram, LogOut } from "lucide-react";
 import { toast } from "sonner";
 
 const approvalStatusColors: Record<string, string> = {
@@ -21,51 +34,145 @@ const approvalStatusColors: Record<string, string> = {
   rejected: "bg-red-100 text-red-800",
 };
 
+/** Draw the cropped region of an image onto a 400x400 canvas and return a JPEG Blob. */
+function getCroppedImg(
+  imageSrc: string,
+  pixelCrop: Area,
+  size = 400
+): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    const img = new window.Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return reject(new Error("Canvas context unavailable"));
+
+      ctx.drawImage(
+        img,
+        pixelCrop.x,
+        pixelCrop.y,
+        pixelCrop.width,
+        pixelCrop.height,
+        0,
+        0,
+        size,
+        size
+      );
+
+      canvas.toBlob(
+        (blob) => {
+          if (blob) resolve(blob);
+          else reject(new Error("Canvas toBlob failed"));
+        },
+        "image/jpeg",
+        0.9
+      );
+    };
+    img.onerror = () => reject(new Error("Failed to load image"));
+    img.src = imageSrc;
+  });
+}
+
 export default function SettingsPage() {
   const router = useRouter();
-  const { society, account, profile, loading } =
-    useSocietyAuth();
+  const { societyId } = useParams();
+  const { society, account, profile, loading } = useSocietyAuth();
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [saving, setSaving] = useState(false);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+
+  // Image crop state
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [cropDialogOpen, setCropDialogOpen] = useState(false);
+  const [cropImage, setCropImage] = useState<string | null>(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
-    if (profile) {
-      setName(profile.name ?? "");
-      setDescription(profile.description ?? "");
+    if (typeof societyId === "string") {
+      getSocietyProfileData(societyId).then((data) => {
+        setName(data.name ?? "");
+        setDescription(data.description ?? "");
+        setImageUrl(data.imageUrl);
+      });
     }
-  }, [profile]);
+  }, [societyId]);
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (typeof societyId !== "string") return;
+
     setSaving(true);
-    await new Promise((r) => setTimeout(r, 500));
-    toast.success("Profile updated successfully.");
+    const supabase = createAuthBrowserClient();
+    const result = await updateSocietyProfileDetails(supabase, societyId, {
+      name,
+      description,
+    });
+
+    if (result.success) {
+      toast.success("Profile updated successfully.");
+    } else {
+      toast.error(result.error ?? "Failed to update profile.");
+    }
     setSaving(false);
   };
 
-  const handleChangePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    if (newPassword.length < 8) {
-      toast.error("Password must be at least 8 characters.");
+    // Reset for next selection
+    e.target.value = "";
+
+    const objectUrl = URL.createObjectURL(file);
+    setCropImage(objectUrl);
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+    setCroppedAreaPixels(null);
+    setCropDialogOpen(true);
+  };
+
+  const onCropComplete = useCallback((_: Area, croppedPixels: Area) => {
+    setCroppedAreaPixels(croppedPixels);
+  }, []);
+
+  const handleCropConfirm = async () => {
+    if (!cropImage || !croppedAreaPixels || typeof societyId !== "string")
       return;
-    }
 
-    if (newPassword !== confirmPassword) {
-      toast.error("Passwords do not match.");
-      return;
-    }
+    setUploading(true);
+    try {
+      const blob = await getCroppedImg(cropImage, croppedAreaPixels);
+      const supabase = createAuthBrowserClient();
+      const result = await updateSocietyProfileImage(supabase, societyId, blob);
 
-    setSaving(true);
-    await new Promise((r) => setTimeout(r, 500));
-    setNewPassword("");
-    setConfirmPassword("");
-    toast.success("Password updated successfully.");
-    setSaving(false);
+      if (result.imageUrl) {
+        setImageUrl(result.imageUrl);
+        toast.success("Profile image updated.");
+      } else {
+        toast.error(result.error ?? "Failed to upload image.");
+      }
+    } catch {
+      toast.error("Failed to process image.");
+    } finally {
+      setUploading(false);
+      setCropDialogOpen(false);
+      if (cropImage) URL.revokeObjectURL(cropImage);
+      setCropImage(null);
+    }
+  };
+
+  const handleCropCancel = () => {
+    setCropDialogOpen(false);
+    if (cropImage) URL.revokeObjectURL(cropImage);
+    setCropImage(null);
   };
 
   const handleSignOut = async () => {
@@ -98,6 +205,83 @@ export default function SettingsPage() {
           Manage your society profile and account settings
         </p>
       </div>
+
+      {/* Society image */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Society Image</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center gap-4">
+          {imageUrl ? (
+            <img
+              src={imageUrl}
+              alt={profile?.name ?? "Society"}
+              className="h-24 w-24 rounded-full object-cover"
+            />
+          ) : (
+            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-muted">
+              <Image className="h-8 w-8 text-muted-foreground" />
+            </div>
+          )}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg"
+            className="hidden"
+            onChange={handleFileSelected}
+          />
+          <Button
+            variant="outline"
+            disabled={uploading}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {uploading ? "Uploading..." : "Upload New Image"}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Crop dialog */}
+      <Dialog open={cropDialogOpen} onOpenChange={setCropDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Crop Profile Image</DialogTitle>
+          </DialogHeader>
+          <div className="relative h-64 w-full">
+            {cropImage && (
+              <Cropper
+                image={cropImage}
+                crop={crop}
+                zoom={zoom}
+                aspect={1}
+                cropShape="round"
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onCropComplete={onCropComplete}
+              />
+            )}
+          </div>
+          <div className="flex items-center gap-3 px-1">
+            <Label className="text-sm shrink-0">Zoom</Label>
+            <input
+              type="range"
+              min={1}
+              max={3}
+              step={0.05}
+              value={zoom}
+              onChange={(e) => setZoom(Number(e.target.value))}
+              className="w-full"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleCropCancel}>
+              Cancel
+            </Button>
+            <Button onClick={handleCropConfirm} disabled={uploading}>
+              {uploading ? "Uploading..." : "Confirm"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Account status */}
       <Card>
@@ -161,40 +345,6 @@ export default function SettingsPage() {
             </div>
             <Button type="submit" disabled={saving}>
               {saving ? "Saving..." : "Save Changes"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-
-      {/* Change password */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Change Password</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleChangePassword} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="new-password">New Password</Label>
-              <Input
-                id="new-password"
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Enter new password"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirm-password">Confirm Password</Label>
-              <Input
-                id="confirm-password"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirm new password"
-              />
-            </div>
-            <Button type="submit" disabled={saving}>
-              {saving ? "Updating..." : "Update Password"}
             </Button>
           </form>
         </CardContent>

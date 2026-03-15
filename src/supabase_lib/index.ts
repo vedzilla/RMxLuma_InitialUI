@@ -56,6 +56,8 @@ export {
   getSocietyAccount,
   getPendingSocietyAccounts,
   getApprovalStatuses,
+  updateSocietyProfileDetails,
+  updateSocietyProfileImage,
 } from './societies';
 
 // Universities
