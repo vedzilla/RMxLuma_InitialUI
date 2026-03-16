@@ -191,7 +191,7 @@ export default function LandingPageClient({ societyCount, universityCount, stude
                 <div className="w-px h-8 bg-border" />
                 <div>
                   <p className="text-xl font-bold text-text">{universityCount}</p>
-                  <p className="text-subtle text-xs">Universities</p>
+                  <p className="text-subtle text-xs">{universityCount === 1 ? 'University' : 'Universities'}</p>
                 </div>
                 <div className="w-px h-8 bg-border" />
                 <div>
@@ -276,7 +276,7 @@ export default function LandingPageClient({ societyCount, universityCount, stude
         <div className="max-w-[1200px] mx-auto px-6 py-10 text-center">
           <p className="text-subtle text-[15px]">
             <span className="font-semibold text-text">{formatCompactNumber(societyCount)} societies</span> from{' '}
-            <span className="font-semibold text-text">{universityCount} universities</span> in{' '}
+            <span className="font-semibold text-text">{universityCount} {universityCount === 1 ? 'university' : 'universities'}</span> in{' '}
             <span className="font-semibold text-text">Manchester</span>
             {' '}— all in one place.
           </p>
