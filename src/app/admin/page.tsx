@@ -84,7 +84,7 @@ export default async function AdminDashboard() {
         </div>
 
         {/* Quick links */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Link
             href="/admin/applications"
             className="bg-[var(--surface)] rounded-[var(--radius)] border border-[var(--border)] p-5 hover:border-[var(--accent)] transition-colors group"
@@ -113,6 +113,18 @@ export default async function AdminDashboard() {
             </p>
             <p className="text-xs text-[var(--muted)] mt-1">
               View app usage analytics from PostHog
+            </p>
+          </Link>
+
+          <Link
+            href="/admin/user-roles"
+            className="bg-[var(--surface)] rounded-[var(--radius)] border border-[var(--border)] p-5 hover:border-[var(--accent)] transition-colors group"
+          >
+            <p className="text-sm font-medium text-[var(--text)] group-hover:text-[var(--accent)] transition-colors">
+              Committee Roles
+            </p>
+            <p className="text-xs text-[var(--muted)] mt-1">
+              Manage society committee member roles
             </p>
           </Link>
         </div>
