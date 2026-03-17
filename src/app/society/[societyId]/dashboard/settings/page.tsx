@@ -97,7 +97,8 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (typeof societyId === "string") {
-      getSocietyProfileData(societyId).then((data) => {
+      const supabase = createAuthBrowserClient();
+      getSocietyProfileData(societyId, supabase).then((data) => {
         setName(data.name ?? "");
         setDescription(data.description ?? "");
         setImageUrl(data.imageUrl);

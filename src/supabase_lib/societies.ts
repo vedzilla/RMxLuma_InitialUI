@@ -155,9 +155,10 @@ export async function getApprovalStatuses(
  * Checks society_profiles first, falls back to societies table for any null fields.
  */
 export async function getSocietyProfileData(
-  societyId: string
+  societyId: string,
+  supabase?: SupabaseClient
 ): Promise<{ name: string | null; description: string | null; imageUrl: string | null }> {
-  const client = getClient();
+  const client = supabase ?? getClient();
 
   const { data: profileData } = await client
     .from('society_profiles')
@@ -191,8 +192,8 @@ export async function getSocietyProfileData(
  * Fetch the image URL for a society.
  * Checks society_profiles first, falls back to societies table.
  */
-export async function getSocietyImageUrl(societyId: string): Promise<string | null> {
-  const client = getClient();
+export async function getSocietyImageUrl(societyId: string, supabase?: SupabaseClient): Promise<string | null> {
+  const client = supabase ?? getClient();
 
   const { data: profileData } = await client
     .from('society_profiles')
@@ -247,8 +248,11 @@ export async function updateSocietyProfileDetails(
   societyId: string,
   fields: { name?: string; description?: string }
 ): Promise<{ success: boolean; error?: string }> {
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) return { success: false, error: 'Not authenticated' };
+
   const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return { success: false, error: 'Not authenticated' };
+  if (!session) return { success: false, error: 'Session expired — please sign in again' };
 
   try {
     const res = await fetch(`${SUPABASE_URL}/functions/v1/set-society-profile-details`, {
@@ -281,8 +285,11 @@ export async function updateSocietyProfileImage(
   societyId: string,
   imageBlob: Blob
 ): Promise<{ imageUrl: string | null; error?: string }> {
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) return { imageUrl: null, error: 'Not authenticated' };
+
   const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return { imageUrl: null, error: 'Not authenticated' };
+  if (!session) return { imageUrl: null, error: 'Session expired — please sign in again' };
 
   try {
     const formData = new FormData();
