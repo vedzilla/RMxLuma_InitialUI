@@ -33,7 +33,7 @@ const eventFormSchema = z.object({
     .min(1, "Add at least one schedule entry"),
   isOnline: z.boolean(),
   isFree: z.boolean(),
-  price: z.string().optional(),
+  price: z.string().max(100, "Price description must be under 100 characters").optional(),
   registrationUrl: z.string().url("Enter a valid URL").optional().or(z.literal("")),
 });
 
@@ -219,11 +219,16 @@ export function EventForm({
           {!isFree && (
             <div className="space-y-1.5">
               <Label htmlFor="price">Price</Label>
+              <p className="text-sm text-muted-foreground">Describe the price — not just a number</p>
               <Input
                 id="price"
-                placeholder="e.g. 5.00"
+                placeholder="e.g. £4 at the door"
+                maxLength={100}
                 {...register("price")}
               />
+              {errors.price && (
+                <p className="text-sm text-destructive">{errors.price.message}</p>
+              )}
             </div>
           )}
 
