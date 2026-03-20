@@ -107,11 +107,8 @@ export default function CommitteePage() {
           return status === 'approved' || status === 'trusted';
         }
       );
-      const pending = accounts.filter(
+      const pendingAccounts = accounts.filter(
         (a) => a.society_account_approval_status?.name === 'pending'
-      );
-      const rejected = accounts.filter(
-        (a) => a.society_account_approval_status?.name === 'rejected'
       );
 
       // Phase 2: Fetch committee permissions (needs accountIds from Phase 1)
@@ -158,21 +155,37 @@ export default function CommitteePage() {
         })
       );
 
-      // Build request lists
-      const buildRequest = (a: typeof accounts[number]): ApprovalRequest => {
-        const details = detailsByUserId.get(a.auth_user_id);
-        return {
-          accountId: a.id,
-          authUserId: a.auth_user_id,
-          name: details?.name ?? null,
-          email: details?.email ?? null,
-          requestedAt: a.created_at,
-          status: a.society_account_approval_status?.name as 'pending' | 'rejected',
-        };
-      };
+      // Build pending requests from accounts query, with details from edge function
+      setPendingRequests(
+        pendingAccounts.map((a): ApprovalRequest => {
+          const details = detailsByUserId.get(a.auth_user_id);
+          return {
+            accountId: a.id,
+            authUserId: a.auth_user_id,
+            name: details?.name ?? null,
+            email: details?.email ?? null,
+            requestedAt: a.created_at,
+            status: 'pending',
+          };
+        })
+      );
 
-      setPendingRequests(pending.map(buildRequest));
-      setRejectedRequests(rejected.map(buildRequest));
+      // Build rejected requests from the edge function response (source of truth for rejected users)
+      const rejectedApplicants = applicantDetails.filter((a) => a.status === 'rejected');
+      setRejectedRequests(
+        rejectedApplicants.map((a): ApprovalRequest => {
+          // Try to find matching account for the date
+          const account = accounts.find((acc) => acc.auth_user_id === a.user_id);
+          return {
+            accountId: account?.id ?? a.user_id,
+            authUserId: a.user_id,
+            name: a.name,
+            email: a.email,
+            requestedAt: account?.created_at ?? '',
+            status: 'rejected',
+          };
+        })
+      );
     } catch (err) {
       console.error('[CommitteePage] fetch error:', err);
       setDataError('Failed to load committee data. Please try again.');
@@ -463,29 +476,33 @@ export default function CommitteePage() {
       </Card>
 
       {/* Rejected profiles toggle */}
-      {rejectedRequests.length > 0 && (
-        <div>
-          <button
-            onClick={() => setShowRejected(!showRejected)}
-            className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ChevronDown
-              className={cn(
-                'h-4 w-4 transition-transform duration-200',
-                showRejected && 'rotate-180'
-              )}
-            />
-            Show rejected profiles ({rejectedRequests.length})
-          </button>
+      <div>
+        <button
+          onClick={() => setShowRejected(!showRejected)}
+          className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ChevronDown
+            className={cn(
+              'h-4 w-4 transition-transform duration-200',
+              showRejected && 'rotate-180'
+            )}
+          />
+          See previous rejections ({rejectedRequests.length})
+        </button>
 
-          {/* Rejected profiles card */}
-          <div
-            className="grid transition-[grid-template-rows] duration-300 ease-in-out"
-            style={{ gridTemplateRows: showRejected ? '1fr' : '0fr' }}
-          >
-            <div className="overflow-hidden min-h-0">
-              <Card className={cn('mt-3 border-red-200 transition-opacity duration-300', showRejected ? 'opacity-100' : 'opacity-0')}>
-                <CardContent className="p-0">
+        {/* Rejected profiles card */}
+        <div
+          className="grid transition-[grid-template-rows] duration-300 ease-in-out"
+          style={{ gridTemplateRows: showRejected ? '1fr' : '0fr' }}
+        >
+          <div className="overflow-hidden min-h-0">
+            <Card className={cn('mt-3 border-red-200 transition-opacity duration-300', showRejected ? 'opacity-100' : 'opacity-0')}>
+              <CardContent className="p-0">
+                {rejectedRequests.length === 0 ? (
+                  <div className="px-6 py-8 text-center">
+                    <p className="text-sm text-muted-foreground">No previous rejections.</p>
+                  </div>
+                ) : (
                   <div className="divide-y divide-red-100">
                     {rejectedRequests.map((request) => (
                       <div
@@ -500,9 +517,11 @@ export default function CommitteePage() {
                             {request.email ?? request.authUserId.slice(0, 8) + '…'}
                           </p>
                         </div>
-                        <span className="text-xs text-muted-foreground shrink-0 hidden sm:block">
-                          {formatDate(request.requestedAt)}
-                        </span>
+                        {request.requestedAt && (
+                          <span className="text-xs text-muted-foreground shrink-0 hidden sm:block">
+                            {formatDate(request.requestedAt)}
+                          </span>
+                        )}
                         <Badge
                           variant="outline"
                           className="border-red-200 bg-red-50 text-red-700 text-[10px]"
@@ -512,12 +531,12 @@ export default function CommitteePage() {
                       </div>
                     ))}
                   </div>
-                </CardContent>
+                )}
+              </CardContent>
               </Card>
             </div>
           </div>
         </div>
-      )}
     </div>
   );
 }

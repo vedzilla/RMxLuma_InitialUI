@@ -11,7 +11,7 @@ import { Plus } from "lucide-react";
 
 export default function EventsPage() {
   const nav = useDashboardNav();
-  const { society } = useSocietyAuth();
+  const { society, permissions } = useSocietyAuth();
   const { events, loading, error, fetchEvents } = useEvents(society?.id);
 
   useEffect(() => {
@@ -29,10 +29,12 @@ export default function EventsPage() {
             Manage and track all your society events
           </p>
         </div>
-        <Button render={<Link href={nav.href("/events/new")} />}>
-          <Plus className="mr-2 h-4 w-4" />
-          Create Event
-        </Button>
+        {permissions.includes("manage_events") && (
+          <Button render={<Link href={nav.href("/events/new")} />}>
+            <Plus className="mr-2 h-4 w-4" />
+            Create Event
+          </Button>
+        )}
       </div>
 
       {error && (

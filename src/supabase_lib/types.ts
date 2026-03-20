@@ -321,6 +321,7 @@ export interface CommitteeApplicantDetail {
   user_id: string;
   email: string;
   name: string;
+  status: 'pending' | 'rejected';
 }
 
 // ---- Society account joined types ----
