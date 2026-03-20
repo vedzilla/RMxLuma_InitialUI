@@ -9,6 +9,8 @@ import type {
   SocietyAccountApprovalStatusRow,
   SocietyManagementPermRow,
   SocietyCommitteePermWithName,
+  CommitteeMemberDetail,
+  CommitteeApplicantDetail,
 } from './types';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -424,5 +426,73 @@ export async function toggleCommitteePermission(
   } catch (err) {
     console.error('[supabase_lib] toggleCommitteePermission error:', err);
     return { success: false, error: 'Network error' };
+  }
+}
+
+/**
+ * Fetch committee member details (name, email, role) for a society via edge function.
+ * Returns details for all approved/trusted members.
+ */
+export async function getCommitteeMemberDetails(
+  supabase: SupabaseClient,
+  societyId: string,
+): Promise<CommitteeMemberDetail[]> {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return [];
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/get-committee-members-details`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ society_id: societyId }),
+    });
+
+    if (!res.ok) {
+      console.error('[supabase_lib] getCommitteeMemberDetails error: HTTP', res.status);
+      return [];
+    }
+
+    const data = await res.json();
+    return data.members ?? [];
+  } catch (err) {
+    console.error('[supabase_lib] getCommitteeMemberDetails error:', err);
+    return [];
+  }
+}
+
+/**
+ * Fetch applicant details (name, email) for a society via edge function.
+ * Returns details for pending (and rejected) applicants.
+ */
+export async function getCommitteeApplicantDetails(
+  supabase: SupabaseClient,
+  societyId: string,
+): Promise<CommitteeApplicantDetail[]> {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return [];
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/get-committee-application-details`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ society_id: societyId }),
+    });
+
+    if (!res.ok) {
+      console.error('[supabase_lib] getCommitteeApplicantDetails error: HTTP', res.status);
+      return [];
+    }
+
+    const data = await res.json();
+    return data.applicants ?? [];
+  } catch (err) {
+    console.error('[supabase_lib] getCommitteeApplicantDetails error:', err);
+    return [];
   }
 }

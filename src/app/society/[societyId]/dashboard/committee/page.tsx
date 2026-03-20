@@ -20,8 +20,9 @@ import {
   getManagementPermissions,
   getCommitteePermissions,
   toggleCommitteePermission,
+  getCommitteeMemberDetails,
+  getCommitteeApplicantDetails,
 } from '@/supabase_lib/societies';
-import { getSocietyUserDetails } from '@/supabase_lib/users';
 import type { SocietyManagementPermRow } from '@/supabase_lib/types';
 
 // ---- Types ----
@@ -32,6 +33,7 @@ interface CommitteeMember {
   name: string | null;
   email: string | null;
   status: string;
+  roleName: string | null;
   permissions: string[]; // permission IDs currently granted
   createdAt: string;
 }
@@ -88,10 +90,12 @@ export default function CommitteePage() {
     try {
       const supabase = createAuthBrowserClient();
 
-      // Fetch accounts and permissions in parallel
-      const [accounts, perms] = await Promise.all([
+      // Phase 1: Fetch accounts, permissions, and user details in parallel
+      const [accounts, perms, memberDetails, applicantDetails] = await Promise.all([
         getSocietyAccountsForSociety(supabase, societyId),
         getManagementPermissions(supabase),
+        getCommitteeMemberDetails(supabase, societyId),
+        getCommitteeApplicantDetails(supabase, societyId),
       ]);
 
       setAvailablePermissions(perms);
@@ -110,14 +114,9 @@ export default function CommitteePage() {
         (a) => a.society_account_approval_status?.name === 'rejected'
       );
 
-      // Fetch committee permissions and user details in parallel
+      // Phase 2: Fetch committee permissions (needs accountIds from Phase 1)
       const memberAccountIds = memberAccounts.map((a) => a.id);
-      const allAccounts = [...memberAccounts, ...pending, ...rejected];
-
-      const [committeePerms, ...userDetails] = await Promise.all([
-        getCommitteePermissions(supabase, memberAccountIds),
-        ...allAccounts.map((a) => getSocietyUserDetails(supabase, a.auth_user_id)),
-      ]);
+      const committeePerms = await getCommitteePermissions(supabase, memberAccountIds);
 
       // Build a map of accountId → permission IDs
       const permsByAccount = new Map<string, string[]>();
@@ -127,11 +126,20 @@ export default function CommitteePage() {
         permsByAccount.set(cp.society_account_id, existing);
       }
 
-      // Build a map of authUserId → user details
+      // Build a map of authUserId → user details from the bulk edge function responses
       const detailsByUserId = new Map<string, { name: string | null; email: string | null }>();
-      allAccounts.forEach((account, i) => {
-        detailsByUserId.set(account.auth_user_id, userDetails[i]);
-      });
+      for (const m of memberDetails) {
+        detailsByUserId.set(m.user_id, { name: m.name, email: m.email });
+      }
+      for (const a of applicantDetails) {
+        detailsByUserId.set(a.user_id, { name: a.name, email: a.email });
+      }
+
+      // Build a map of authUserId → role_name from member details
+      const roleByUserId = new Map<string, string | null>();
+      for (const m of memberDetails) {
+        roleByUserId.set(m.user_id, m.role_name);
+      }
 
       // Build member list
       setMembers(
@@ -143,6 +151,7 @@ export default function CommitteePage() {
             name: details?.name ?? null,
             email: details?.email ?? null,
             status: a.society_account_approval_status?.name ?? 'approved',
+            roleName: roleByUserId.get(a.auth_user_id) ?? null,
             permissions: permsByAccount.get(a.id) ?? [],
             createdAt: a.created_at,
           };
@@ -339,6 +348,11 @@ export default function CommitteePage() {
                         <p className="text-sm font-medium text-foreground">
                           {member.name ?? 'Unknown User'}
                         </p>
+                        {member.roleName && (
+                          <Badge variant="outline" className="text-[10px]">
+                            {member.roleName}
+                          </Badge>
+                        )}
                         {member.status === 'trusted' && (
                           <Badge variant="secondary" className="text-[10px]">
                             Trusted

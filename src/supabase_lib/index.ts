@@ -30,6 +30,8 @@ export type {
   SocietyAccountWithSociety,
   SocietyManagementPermRow,
   SocietyCommitteePermWithName,
+  CommitteeMemberDetail,
+  CommitteeApplicantDetail,
   StudyLevelRow,
   InteractionTypeRow,
   EventWithRelations,
@@ -64,6 +66,8 @@ export {
   getManagementPermissions,
   getCommitteePermissions,
   toggleCommitteePermission,
+  getCommitteeMemberDetails,
+  getCommitteeApplicantDetails,
 } from './societies';
 
 // Universities

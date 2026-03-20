@@ -271,6 +271,21 @@ export interface SocietyCommitteePermWithName {
   society_management_perms: Pick<SocietyManagementPermRow, 'id' | 'name'>;
 }
 
+/** A member record returned by the get-committee-members-details edge function. */
+export interface CommitteeMemberDetail {
+  user_id: string;
+  email: string;
+  name: string;
+  role_name: string | null;
+}
+
+/** An applicant record returned by the get-committee-application-details edge function. */
+export interface CommitteeApplicantDetail {
+  user_id: string;
+  email: string;
+  name: string;
+}
+
 // ---- Society account joined types ----
 
 // SocietyAccount with nested approval status name.
