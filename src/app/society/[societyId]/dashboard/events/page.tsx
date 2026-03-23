@@ -30,7 +30,7 @@ export default function EventsPage() {
           </p>
         </div>
         {permissions.includes("manage_events") && (
-          <Button render={<Link href={nav.href("/events/new")} />}>
+          <Button nativeButton={false} render={<Link href={nav.href("/events/new")} />}>
             <Plus className="mr-2 h-4 w-4" />
             Create Event
           </Button>
