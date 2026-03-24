@@ -37,7 +37,7 @@ export default function AboutPage() {
             <a className="px-6 py-3 bg-text text-surface rounded-lg font-semibold hover:bg-subtle transition-colors" href="https://apps.apple.com/gb/app/redefine-me/id6759492024">
               Download for iOS
             </a>
-            <a className="px-6 py-3 border border-border text-text rounded-lg font-semibold hover:bg-bg transition-colors">
+            <a className="px-6 py-3 border border-border text-text rounded-lg font-semibold hover:bg-bg transition-colors" href="https://play.google.com/store/apps/details?id=com.redefineme.app">
               Download for Android
             </a>
           </div>
