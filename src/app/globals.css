@@ -132,6 +132,17 @@
   --sidebar-ring: #6366F1;
 }
 
+/* ── Dashboard-scoped primary: red instead of indigo ── */
+.dashboard-scope {
+  --primary: #EF4444;
+  --primary-hover: #B91C1C;
+  --ring: #EF4444;
+  --sidebar-primary: #EF4444;
+  --sidebar-ring: #EF4444;
+  --accent-bg: #FEF2F2;
+  --sidebar-accent: #FEF2F2;
+}
+
 /* ── Base styles ── */
 @layer base {
   * {

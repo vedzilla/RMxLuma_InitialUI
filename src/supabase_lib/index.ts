@@ -31,8 +31,12 @@ export type {
   StudyLevelRow,
   InterestRow,
   InteractionTypeRow,
+  DegreeTypeRow,
+  UniversityCourseRow,
+  UniversityCourseWithDegreeType,
   StudyLevel,
   Interest,
+  UniversityCourse,
   EventWithRelations,
   SocietyWithUniversity,
 } from './types';
@@ -84,6 +88,9 @@ export { getStudyLevels } from './studyLevels';
 // Interests
 export { getInterests } from './interests';
 
+// Courses
+export { getUniversityCourses } from './courses';
+
 // Onboarding
 export { submitOnboarding, uploadProfilePicture, saveUserInterests } from './onboarding';
 
@@ -97,4 +104,5 @@ export {
   transformCity,
   transformStudyLevel,
   transformInterest,
+  transformUniversityCourse,
 } from './transform';

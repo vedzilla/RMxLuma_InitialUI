@@ -4,12 +4,15 @@ import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { AnimatePresence, motion } from 'framer-motion';
+import { AuroraBackground } from '@/components/ui/aurora-background';
+import { GlobalSpotlight } from '@/components/ui/spotlight';
 import { createAuthBrowserClient } from '@/supabase_lib/auth/browser';
 import { submitOnboarding, uploadProfilePicture, saveUserInterests } from '@/supabase_lib/onboarding';
 import type { University, StudyLevel, Interest } from '@/supabase_lib/types';
 import StepIndicator from './components/StepIndicator';
 import ProfilePictureStep from './steps/ProfilePictureStep';
 import UniversityStep from './steps/UniversityStep';
+import CourseStep from './steps/CourseStep';
 import StudyLevelStep from './steps/StudyLevelStep';
 import InterestsStep from './steps/InterestsStep';
 import CompletionStep from './steps/CompletionStep';
@@ -26,11 +29,12 @@ interface OnboardingWizardProps {
 interface OnboardingData {
   profilePicture: File | null;
   universityId: string | null;
+  universityCourseId: string | null;
   studyLevelId: string | null;
   interestIds: string[];
 }
 
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 5;
 
 const slideVariants = {
   enter: (direction: number) => ({
@@ -64,6 +68,7 @@ export default function OnboardingWizard({
   const [data, setData] = useState<OnboardingData>({
     profilePicture: null,
     universityId: null,
+    universityCourseId: null,
     studyLevelId: null,
     interestIds: [],
   });
@@ -79,7 +84,7 @@ export default function OnboardingWizard({
   }, []);
 
   const handleSubmit = useCallback(async () => {
-    if (!data.universityId || !data.studyLevelId || data.interestIds.length === 0) return;
+    if (!data.universityId || !data.universityCourseId || !data.studyLevelId || data.interestIds.length === 0) return;
 
     setSubmitting(true);
     setError('');
@@ -94,10 +99,11 @@ export default function OnboardingWizard({
         });
       }
 
-      // Submit onboarding data (university + study level)
+      // Submit onboarding data (university + course + study level)
       const result = await submitOnboarding(supabase, {
         university_id: data.universityId,
         study_level_id: data.studyLevelId,
+        university_course_id: data.universityCourseId,
       });
 
       if (!result.success) {
@@ -105,6 +111,7 @@ export default function OnboardingWizard({
         const retry = await submitOnboarding(supabase, {
           university_id: data.universityId,
           study_level_id: data.studyLevelId,
+          university_course_id: data.universityCourseId,
         });
         if (!retry.success) {
           setError('Something went wrong. Please try again.');
@@ -147,12 +154,27 @@ export default function OnboardingWizard({
           <UniversityStep
             universities={universities}
             selectedId={data.universityId}
-            onSelect={id => setData(prev => ({ ...prev, universityId: id }))}
+            onSelect={id => setData(prev => ({
+              ...prev,
+              universityId: id,
+              // Reset course when university changes
+              universityCourseId: prev.universityId !== id ? null : prev.universityCourseId,
+            }))}
             onNext={goNext}
             onBack={goBack}
           />
         );
       case 2:
+        return (
+          <CourseStep
+            universityId={data.universityId!}
+            selectedId={data.universityCourseId}
+            onSelect={id => setData(prev => ({ ...prev, universityCourseId: id }))}
+            onNext={goNext}
+            onBack={goBack}
+          />
+        );
+      case 3:
         return (
           <StudyLevelStep
             studyLevels={studyLevels}
@@ -162,7 +184,7 @@ export default function OnboardingWizard({
             onBack={goBack}
           />
         );
-      case 3:
+      case 4:
         return (
           <InterestsStep
             interests={interests}
@@ -188,46 +210,76 @@ export default function OnboardingWizard({
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--bg)] px-4 py-8">
-      <div className="w-full max-w-md">
-        {/* Logo */}
-        <div className="flex justify-center mb-6">
-          <Image
-            src="/logos/rm-dot-logo.png"
-            alt="RedefineMe"
-            width={140}
-            height={36}
-            priority
-          />
-        </div>
+    <AuroraBackground opacity={12} showRadialGradient={false} className="min-h-screen">
+      <GlobalSpotlight size={400} color="rgba(99, 102, 241, 0.06)" />
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 py-8">
+        <div className="w-full max-w-md">
+          {/* Logo — crossfade between dot and no-dot variants */}
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="flex justify-center mb-6"
+          >
+            <div className="relative w-[140px] h-[36px]">
+              <Image
+                src="/logos/rm-no-dot-logo.png"
+                alt=""
+                width={140}
+                height={36}
+                className="absolute inset-0 w-full h-full object-contain"
+                aria-hidden
+              />
+              <Image
+                src="/logos/rm-dot-logo.png"
+                alt="RedefineMe"
+                width={140}
+                height={36}
+                priority
+                className="absolute inset-0 w-full h-full object-contain animate-[logoDotFade_6s_ease-in-out_infinite]"
+              />
+            </div>
+          </motion.div>
 
-        {/* Step indicator (hidden on completion) */}
-        {currentStep < TOTAL_STEPS && (
-          <StepIndicator totalSteps={TOTAL_STEPS} currentStep={currentStep} />
-        )}
-
-        {/* Error message */}
-        {error && (
-          <p className="text-sm text-[var(--red)] text-center mb-4">{error}</p>
-        )}
-
-        {/* Step content */}
-        <div className="relative overflow-hidden">
-          <AnimatePresence mode="wait" custom={direction}>
+          {/* Step indicator (hidden on completion) */}
+          {currentStep < TOTAL_STEPS && (
             <motion.div
-              key={currentStep}
-              custom={direction}
-              variants={slideVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={{ duration: 0.25, ease: 'easeInOut' }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4, delay: 0.25 }}
             >
-              {renderStep()}
+              <StepIndicator totalSteps={TOTAL_STEPS} currentStep={currentStep} />
             </motion.div>
-          </AnimatePresence>
+          )}
+
+          {/* Error message */}
+          {error && (
+            <p className="text-sm text-[var(--red)] text-center mb-4">{error}</p>
+          )}
+
+          {/* Step content */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="relative overflow-hidden"
+          >
+            <AnimatePresence mode="wait" custom={direction}>
+              <motion.div
+                key={currentStep}
+                custom={direction}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.25, ease: 'easeInOut' }}
+              >
+                {renderStep()}
+              </motion.div>
+            </AnimatePresence>
+          </motion.div>
         </div>
       </div>
-    </div>
+    </AuroraBackground>
   );
 }

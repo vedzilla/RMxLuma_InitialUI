@@ -47,7 +47,7 @@ export default function ProfilePictureStep({
   };
 
   return (
-    <div className="bg-[var(--surface)] rounded-[var(--radius)] shadow-[var(--shadow)] p-8">
+    <div className="bg-white/80 backdrop-blur-xl rounded-[var(--radius)] shadow-[var(--shadow)] p-8">
       <h2 className="text-xl font-semibold text-[var(--text)] text-center mb-1">
         Add a profile photo
       </h2>
@@ -94,9 +94,10 @@ export default function ProfilePictureStep({
       <div className="space-y-3">
         <button
           onClick={onNext}
-          className="w-full py-2.5 rounded-xl bg-[var(--text)] text-[var(--surface)] text-sm font-semibold hover:opacity-90 transition-opacity cursor-pointer"
+          className="group relative w-full py-2.5 rounded-xl bg-[#DC2626] text-white text-sm font-semibold hover:brightness-110 transition-all cursor-pointer overflow-hidden"
         >
-          Continue
+          <span className="absolute inset-0 bg-[linear-gradient(110deg,transparent_30%,rgba(255,255,255,0.15)_38%,rgba(255,255,255,0.5)_50%,rgba(255,255,255,0.15)_62%,transparent_70%)] bg-[length:200%_100%] bg-[position:200%_0] group-hover:bg-[position:-200%_0] transition-[background-position] duration-1000 ease-in-out" />
+          <span className="relative">Continue</span>
         </button>
         {!file && !defaultAvatarUrl && (
           <button

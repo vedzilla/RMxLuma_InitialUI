@@ -8,7 +8,7 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
  */
 export async function submitOnboarding(
   supabase: SupabaseClient,
-  data: { university_id: string; study_level_id: string }
+  data: { university_id: string; study_level_id: string; university_course_id: string }
 ): Promise<{ success: boolean; alreadyOnboarded: boolean }> {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) {
