@@ -1,6 +1,6 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
-import { isAdmin } from '@/supabase_lib/users';
+import { isAdmin, checkUserProfileExists } from '@/supabase_lib/users';
 
 export function createMiddlewareClient(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -66,6 +66,18 @@ export async function updateSession(request: NextRequest) {
     if (!user) {
       const url = request.nextUrl.clone();
       url.pathname = '/auth';
+      return NextResponse.redirect(url);
+    }
+    // Already on onboarding — let through
+    return response;
+  }
+
+  // Global guard: authenticated user with no profile → force onboarding
+  if (user && !request.nextUrl.pathname.startsWith('/auth')) {
+    const profileExists = await checkUserProfileExists(supabase, user.id);
+    if (!profileExists) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/onboarding';
       return NextResponse.redirect(url);
     }
   }
