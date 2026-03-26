@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import type { SocietyAccountRow, SocietyRow, SocietyProfileRow } from "@/lib/supabase/types";
-import { mockSociety, mockProfile, mockAccount } from "@/lib/mock-data";
+import { useDashboardContext } from "@/components/dashboard/DashboardContext";
+import { createAuthBrowserClient } from "@/supabase_lib/auth/browser";
 
 interface SocietyAuth {
   user: User | null;
@@ -16,26 +18,91 @@ interface SocietyAuth {
 }
 
 export function useSocietyAuth(): SocietyAuth {
-  const [loading] = useState(false);
+  const { societyId } = useDashboardContext();
+  const router = useRouter();
 
-  const mockUser = {
-    id: "auth-001",
-    email: "cssoc@manchester.ac.uk",
-  } as User;
+  const [user, setUser] = useState<User | null>(null);
+  const [account, setAccount] = useState<SocietyAccountRow | null>(null);
+  const [society, setSociety] = useState<SocietyRow | null>(null);
+  const [profile, setProfile] = useState<SocietyProfileRow | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const signOut = async () => {
-    // no-op in mock mode
-  };
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const supabase = createAuthBrowserClient();
+
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      setUser(authUser);
+
+      if (!authUser) {
+        setLoading(false);
+        return;
+      }
+
+      const [accountResult, societyResult, profileResult] = await Promise.all([
+        supabase
+          .from("society_accounts")
+          .select("*, society_account_approval_status(name)")
+          .eq("auth_user_id", authUser.id)
+          .eq("society_id", societyId)
+          .single(),
+        supabase
+          .from("societies")
+          .select("*")
+          .eq("id", societyId)
+          .single(),
+        supabase
+          .from("society_profiles")
+          .select("*")
+          .eq("society_id", societyId)
+          .single(),
+      ]);
+
+      // Map the joined status name onto the flat approval_status field consumers expect
+      if (accountResult.data) {
+        const raw = accountResult.data as Record<string, unknown>;
+        const statusObj = raw.society_account_approval_status as { name: string } | null;
+        setAccount({
+          ...accountResult.data,
+          approval_status: (statusObj?.name ?? "pending") as SocietyAccountRow["approval_status"],
+        } as SocietyAccountRow);
+      } else {
+        setAccount(null);
+      }
+
+      setSociety((societyResult.data as SocietyRow) ?? null);
+      setProfile((profileResult.data as SocietyProfileRow) ?? null);
+    } catch (err) {
+      console.error("[useSocietyAuth] fetch error:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [societyId]);
+
+  const isMounted = useRef(false);
+  useEffect(() => {
+    if (!isMounted.current) {
+      isMounted.current = true;
+      fetchData();
+    }
+  }, [fetchData]);
+
+  const signOut = useCallback(async () => {
+    const supabase = createAuthBrowserClient();
+    await supabase.auth.signOut();
+    router.push("/auth");
+  }, [router]);
 
   const refresh = useCallback(async () => {
-    // no-op in mock mode
-  }, []);
+    await fetchData();
+  }, [fetchData]);
 
   return {
-    user: mockUser,
-    account: mockAccount,
-    society: mockSociety,
-    profile: mockProfile,
+    user,
+    account,
+    society,
+    profile,
     loading,
     signOut,
     refresh,

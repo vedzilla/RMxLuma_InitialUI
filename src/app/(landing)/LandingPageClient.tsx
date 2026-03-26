@@ -170,6 +170,13 @@ export default function LandingPageClient({ societyCount, universityCount, stude
                   </svg>
                 </Link>
                 <Link
+                  href="/auth"
+                  className="group relative inline-flex items-center gap-2 px-6 py-3 bg-[#DC2626] text-white font-medium rounded-lg hover:brightness-110 transition-all text-sm overflow-hidden"
+                >
+                  <span className="absolute inset-0 bg-[linear-gradient(110deg,transparent_30%,rgba(255,255,255,0.15)_38%,rgba(255,255,255,0.5)_50%,rgba(255,255,255,0.15)_62%,transparent_70%)] bg-[length:200%_100%] bg-[position:200%_0] group-hover:bg-[position:-200%_0] transition-[background-position] duration-1000 ease-in-out" />
+                  <span className="relative">Get Started</span>
+                </Link>
+                <Link
                   href="/about"
                   className="inline-flex items-center gap-2 px-6 py-3 bg-transparent text-text font-medium rounded-lg border border-border hover:bg-surface hover:border-text/30 transition-all text-sm"
                 >
@@ -191,7 +198,7 @@ export default function LandingPageClient({ societyCount, universityCount, stude
                 <div className="w-px h-8 bg-border" />
                 <div>
                   <p className="text-xl font-bold text-text">{universityCount}</p>
-                  <p className="text-subtle text-xs">Universities</p>
+                  <p className="text-subtle text-xs">{universityCount === 1 ? 'University' : 'Universities'}</p>
                 </div>
                 <div className="w-px h-8 bg-border" />
                 <div>
@@ -276,7 +283,7 @@ export default function LandingPageClient({ societyCount, universityCount, stude
         <div className="max-w-[1200px] mx-auto px-6 py-10 text-center">
           <p className="text-subtle text-[15px]">
             <span className="font-semibold text-text">{formatCompactNumber(societyCount)} societies</span> from{' '}
-            <span className="font-semibold text-text">{universityCount} universities</span> in{' '}
+            <span className="font-semibold text-text">{universityCount} {universityCount === 1 ? 'university' : 'universities'}</span> in{' '}
             <span className="font-semibold text-text">Manchester</span>
             {' '}— all in one place.
           </p>

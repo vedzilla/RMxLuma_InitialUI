@@ -45,6 +45,11 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/help" className="text-sm text-subtle hover:text-text transition-colors">
+                  Help
+                </Link>
+              </li>
+              <li>
                 <Link href="/support" className="text-sm text-subtle hover:text-text transition-colors">
                   Support
                 </Link>
