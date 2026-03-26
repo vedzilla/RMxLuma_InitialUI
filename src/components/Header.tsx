@@ -126,7 +126,7 @@ export default function Header({ cities, universities }: HeaderProps) {
                 href="/society"
                 className="desktop-only px-4 py-[10px] text-sm font-medium text-text border border-border rounded-lg bg-transparent hover:bg-[rgba(15,23,42,0.04)] hover:border-text transition-all"
               >
-                Societies
+                Manage Society
               </Link>
             )}
             <Link
