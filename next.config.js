@@ -19,8 +19,8 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               ...sharedHeaders,
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://prod.spline.design https://unpkg.com",
-              "connect-src 'self' https://redefine-me.supabase.co https://prod.spline.design https://unpkg.com",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://prod.spline.design https://unpkg.com https://www.ameportal.com",
+              "connect-src 'self' https://redefine-me.supabase.co https://prod.spline.design https://unpkg.com https://www.ameportal.com",
               "frame-src 'self' https://prod.spline.design",
             ].join('; '),
           },
@@ -46,8 +46,8 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               ...sharedHeaders,
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-              "connect-src 'self' https://redefine-me.supabase.co",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.ameportal.com",
+              "connect-src 'self' https://redefine-me.supabase.co https://www.ameportal.com",
               "frame-src 'self'",
             ].join('; '),
           },

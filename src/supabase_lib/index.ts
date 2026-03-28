@@ -91,6 +91,10 @@ export { getInterests } from './interests';
 // Courses
 export { getUniversityCourses } from './courses';
 
+// Notifications
+export { getPushTokens, getAllUserDetails } from './notifications';
+export type { PushTokenRow, UserDetails } from './notifications';
+
 // Onboarding
 export { submitOnboarding, uploadProfilePicture, saveUserInterests } from './onboarding';
 
